@@ -119,6 +119,10 @@ func vecDot(vec1, vec2 [][]float64) float64 {
     return result
 }
 
+func absVal(n float64) float64 {
+    if n >= 0 {return n} else {return -n}
+}
+
 /*rounds to nearest int and retrun int*/
 func round(i float64) int {
     return int(math.Round(i))

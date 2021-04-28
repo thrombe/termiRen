@@ -5,21 +5,39 @@ import (
     )
 
 func main() {
-    // board := genB()
-    // point(0, 0, board)
+    //board := genB()
+    //point(0, 0, board)
+    //point(-10, -10, board)
     // x, y := rotateP(10, 10, 0, 0, 0.0)
     // point(x, y, board)
     // point(-10, -10, board )
     // vector(1, 2, 30, 11, board)
-    // printB(board)
+    //line(-2, -7, -12, -41, board)
+    //printB(board)
     mat1 := [][]float64 {
         {3, 1, 4, 6}, 
         {1, 4, 6, 3}, 
         {6, 3, 1, 9},
         {2, 8, 5, 8} }
     // fmt.Println(mat1[0][0])
-    new := subMat(mat1, 2, 3)
-    fmt.Println(new)
+    //new := subMat(mat1, 2, 3)
+    _ = mat1
+    //fmt.Println(new)
+    demo()
+}
+
+func demo() {
+    //board := genB()
+    var x1, y1, x2, y2 float64 = 5, 6, 28, 31
+    for {
+        board := genB()
+        line(x1, y1, x2, y2, board)
+        printB(board)
+        _ = board
+        //fmt.Println(x1, x2, y1, y2)
+        x1, y1 = rotateP(x1, y1, 10, 10, 0.2)
+        x2, y2 = rotateP(x2, y2, 10, 10, 0.2)
+    }
 }
 
 const xlim = 151
@@ -48,12 +66,13 @@ func printB(board []int) {
 /*draw line on canvas*/
 func line(x1, y1, x2, y2 float64, board []int) {
     length := math.Sqrt((x2-x1)*(x2-x1) + (y2-y1)*(y2-y1))
+
     vx, vy := float64(x2-x1), float64(y2-y1)
     ux, uy := vx/length,  vy/length
-    x, y, x3 := float64(x1), float64(y1), float64(x2)
-    for x <= x3 {
-        point(x, y, board)
-        x, y = x+ux, y+uy
+    //x, y, x3 := float64(x1), float64(y1), float64(x2)
+    for int(math.Sqrt((x2-x1)*(x2-x1)+(y2-y1)*(y2-y1))) != 0 {
+        point(x1, y1, board)
+        x1, y1 = x1+ux, y1+uy
     }
 }
 
