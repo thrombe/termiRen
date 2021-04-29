@@ -61,18 +61,15 @@ func matScale(mat [][]float64, scale float64) [][]float64 {
 
 /*remember to input y and x index resp. *///returns -1^(x+y)*submat */
 func subMat(mat [][]float64, y, x int) [][]float64 {
-    
     mrows := len(mat)
     var submat [][]float64
     for r := 0; r < mrows; r++ {
         if r == y {continue}
         var row []float64
         for c := 0; c < mrows; c++ {
-
             if c == x {continue}
             row = append(row, mat[r][c])
         }
-        
         submat = append(submat, row)
     }
     return submat
@@ -84,16 +81,11 @@ func matDet(mat [][]float64) float64 {
     mrows, mcols := len(mat), len(mat[0])
     if mrows != mcols {panic("matDet non square matrix")}
     if mrows == 2 {return mat[0][0]*mat[1][1] - mat[0][1]*mat[1][0]}
-    submat := make([][]float64, mrows-1)
     var result float64
-    for r := 0; r < mrows; r++ {
-        for c := 0; c < mrows; c++ {
-            result += mat[r][c] * math.Pow(-1, float64(c)) * matDet(submat)
-        }
+    for c := 0; c < mrows; c++ { // to be more efficient here, we can search for the row/col with most zeroes
+        result += mat[0][c] * math.Pow(-1, float64(c)) * matDet(subMat(mat, 0, c))
     }
-
-    panic("matDet not imllemented")
-    return 0
+    return result
 }
 
 /*returns the size of a n-dimentional vector*/
@@ -109,7 +101,7 @@ func vecSize(vec [][]float64) float64 {
 
 /*returns dot of 2 vectors*/
 func vecDot(vec1, vec2 [][]float64) float64 {
-    if len(vec1[0]) > 1 || len(vec2) > 1 {panic("vecDot not a vector")}
+    if len(vec1[0]) > 1 || len(vec2[0]) > 1 {panic("vecDot not a vector")}
     if len(vec1) != len(vec2) {panic("vecDot vectors of different dimentions")}
     vecDimensions := len(vec1)
     var result float64

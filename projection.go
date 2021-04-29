@@ -2,41 +2,29 @@ package main
 import (
     "fmt"
     "math"
+    "strings"
+    "time"
     )
 
-func main() {
-    //board := genB()
-    //point(0, 0, board)
-    //point(-10, -10, board)
-    // x, y := rotateP(10, 10, 0, 0, 0.0)
-    // point(x, y, board)
-    // point(-10, -10, board )
-    // vector(1, 2, 30, 11, board)
-    //line(-2, -7, -12, -41, board)
-    //printB(board)
-    mat1 := [][]float64 {
-        {3, 1, 4, 6}, 
-        {1, 4, 6, 3}, 
-        {6, 3, 1, 9},
-        {2, 8, 5, 8} }
-    // fmt.Println(mat1[0][0])
-    //new := subMat(mat1, 2, 3)
-    _ = mat1
-    //fmt.Println(new)
+func main() {// REMEMBER TO USE POINTERS and fix line() and printB()
     demo()
 }
 
 func demo() {
     //board := genB()
     var x1, y1, x2, y2 float64 = 5, 6, 28, 31
+    var rx, ry float64 = 5, -3
+    var r float64 = 0.2
     for {
         board := genB()
         line(x1, y1, x2, y2, board)
+        point(rx, ry, board)
         printB(board)
+        time.Sleep(time.Millisecond*150)
         _ = board
         //fmt.Println(x1, x2, y1, y2)
-        x1, y1 = rotateP(x1, y1, 10, 10, 0.2)
-        x2, y2 = rotateP(x2, y2, 10, 10, 0.2)
+        x1, y1 = rotateP(x1, y1, rx, ry, r)
+        x2, y2 = rotateP(x2, y2, rx, ry, r)
     }
 }
 
@@ -51,24 +39,25 @@ func rotateP(x, y, ox, oy, r float64) (float64, float64) {
 }
 
 func printB(board []int) {
-    var scr string
+    var scr strings.Builder
     for y := 0; y < ylim; y++ {
         for x := 0; x < xlim; x++ {
             if board[x+y*xlim] == 1 {
-                scr += "x"
-            } else {scr += "."}
+                scr.WriteString("x")
+            } else {scr.WriteString(".")}
         }
-        scr += "\n"
+        scr.WriteString("\n")
     }
-    fmt.Println(scr)
+    fmt.Println(scr.String())
+
+    //fmt.Println(0)
 }
 
 /*draw line on canvas*/
 func line(x1, y1, x2, y2 float64, board []int) {
     length := math.Sqrt((x2-x1)*(x2-x1) + (y2-y1)*(y2-y1))
-
-    vx, vy := float64(x2-x1), float64(y2-y1)
-    ux, uy := vx/length,  vy/length
+    ux, uy := (x2-x1)/length, (y2-y1)/length
+    //ux, uy := vx/length,  vy/length
     //x, y, x3 := float64(x1), float64(y1), float64(x2)
     for int(math.Sqrt((x2-x1)*(x2-x1)+(y2-y1)*(y2-y1))) != 0 {
         point(x1, y1, board)
@@ -76,7 +65,7 @@ func line(x1, y1, x2, y2 float64, board []int) {
     }
 }
 
-/*draw vector with x1, y1 as offset and x2, y2 as direction*/
+/*draw vector with x1, y1 as offset and x2, y2 as direction and size*/
 func vector(x1, y1, x2, y2 float64, board []int) {
     line(x1, y1, x1+x2, y1+y2, board)
 }
