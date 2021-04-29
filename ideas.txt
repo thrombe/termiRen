@@ -1,0 +1,19 @@
+1. for objects
+    . make class of diff objects, with class.draw() for drawing,
+      class.rotate(), etc
+        eg( 
+          cube:
+            centre = ..
+            side = ..
+            coords = (in terms of centre and side. so that changing centre translates the cube)
+            // if coords not like above, we can try translate() or just 4 by 4 matrix in rotate()
+          )
+        
+
+
+.  remember to
+    . change the printing method, so that points outside the screen dont crash the program
+    . change board to [][]
+    . change printing to something smarter
+    . try: big scrDist and objects within that and origin(closer to screen)
+    . try: 1/(z-scrDist) and scrDist/(z+scrDist) in projectP

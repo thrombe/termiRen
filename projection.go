@@ -10,8 +10,8 @@ func printB(board []int) {
     for y := 0; y < ylim; y++ {
         for x := 0; x < xlim; x++ {
             if board[x+y*xlim] == 1 {
-                scr.WriteString("x")
-            } else {scr.WriteString(".")}
+                scr.WriteString(".")
+            } else {scr.WriteString(" ")}
         }
         scr.WriteString("\n")
     }
@@ -31,7 +31,7 @@ func genB() []int {
     // }
 }
 
-/*enter index of pixel in canvas and return coors in space*/
+//USELESS /*enter index of pixel in canvas and return coors in space*/
 func giveCoords(x, y int) (float64, float64) {
     return float64(x-int(xlim/2)), float64(-y+int(ylim/2)) 
 }
@@ -43,8 +43,10 @@ func giveInd(x, y float64) (int, int) {
 
 /*draw point on canvas*/
 func point(h, k float64, board []int) {
-    x, y := giveInd(h, k)
-    board[x+y*xlim] = 1
+    x, y := giveInd(h, k*charRatio)
+    if 0 <= x && x < xlim && 0 <= y && y < ylim {
+        board[x+y*xlim] = 1
+    }
 }
 
 /*draw line on canvas*/
