@@ -3,35 +3,7 @@ import (
     "fmt"
     "math"
     "strings"
-    "time"
     )
-
-func main() {// REMEMBER TO USE POINTERS and fix line() and printB()
-    demo()
-}
-
-func demo() {
-    board := genB()
-    var x1, y1, x2, y2 float64 = 5, 6, 28, 31
-    var rx, ry float64 = 5, -3
-    var r float64 = 0.03
-    for i:= 0; i < 250; i++ {
-        // board := genB()
-        line(x1, y1, x2, y2, board)
-        point(rx, ry, board)
-        printB(board)
-        // time.Sleep(time.Millisecond*150)
-        _ = time.Millisecond
-        _ = board
-        //fmt.Println(x1, x2, y1, y2)
-        x1, y1 = rotateP(x1, y1, rx, ry, r)
-        x2, y2 = rotateP(x2, y2, rx, ry, r)
-    }
-    // printB(board)
-}
-
-const xlim = 151
-const ylim = 160
 
 func printB(board []int) {
     var scr strings.Builder
@@ -69,18 +41,17 @@ func giveInd(x, y float64) (int, int) {
     return round(x)+int(xlim/2), -round(y)+int(ylim/2)
 }
 
-/*rotate x, y about ox, oy by r radians*/
-func rotateP(x, y, ox, oy, r float64) (float64, float64) {
-    x, y = x-ox, y-oy
-    x, y =  x*math.Cos(r)-y*math.Sin(r), x*math.Sin(r)+y*math.Cos(r)
-    return x+ox, y+oy
+/*draw point on canvas*/
+func point(h, k float64, board []int) {
+    x, y := giveInd(h, k)
+    board[x+y*xlim] = 1
 }
 
 /*draw line on canvas*/
 func line(x1, y1, x2, y2 float64, board []int) {
     length := math.Sqrt((x2-x1)*(x2-x1) + (y2-y1)*(y2-y1))
     ux, uy := (x2-x1)/length, (y2-y1)/length
-    for math.Round((x2-x1)*(x2-x1)+(y2-y1)*(y2-y1)) != 0 {
+    for math.Round(2*((x2-x1)*(x2-x1)+(y2-y1)*(y2-y1))) != 0 {
         point(x1, y1, board)
         x1, y1 = x1+ux, y1+uy
     }
@@ -90,10 +61,3 @@ func line(x1, y1, x2, y2 float64, board []int) {
 func vector(x1, y1, x2, y2 float64, board []int) {
     line(x1, y1, x1+x2, y1+y2, board)
 }
-
-/*draw point on canvas*/
-func point(h, k float64, board []int) {
-    x, y := giveInd(h, k)
-    board[x+y*xlim] = 1
-}
-
