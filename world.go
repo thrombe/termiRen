@@ -5,13 +5,6 @@ import (
 	// "fmt"
 )
 
-/*rotate x, y about ox, oy by r radians*/
-func rotateP2d(x, y, ox, oy, r float64) (float64, float64) {
-    x, y = x-ox, y-oy
-    x, y =  x*math.Cos(r)-y*math.Sin(r), x*math.Sin(r)+y*math.Cos(r)
-    return x+ox, y+oy
-}
-
 /*converts coords from 3d space to 2d so that it can be drawn on canvas*/
 func projectP(p [][]float64) (float64, float64) {
 	z := p[2][0]
@@ -43,7 +36,7 @@ func xysquare3d(o [][]float64, side float64, board []int) {
 
 /*returns rotation matrix of x, y, z angle from respective axes*/
 func rotateP3d(x, y, z float64) [][]float64 {
-    rotMat := [][]float64 {
+    rotMat := [][]float64 { // USE POINTERS FOR TRANSLATION IN 4 BY 4 MATRIX ??!!!!!
         {math.Cos(z), -math.Sin(z), 0},
         {math.Sin(z), math.Cos(z), 0},
         {0, 0, 1},
@@ -58,7 +51,7 @@ func rotateP3d(x, y, z float64) [][]float64 {
         {1, 0, 0},
         {0, math.Cos(x), -math.Sin(x)},
         {0, math.Sin(x), math.Cos(x)},
-    }
+    } // try slapping the 4th row using matAppend() and 4th column manually
     return matMul(rotMat, otherMat)
 }
 
@@ -66,8 +59,8 @@ type cuboid struct{
     coords [][]float64
 }
 
+/*use this to represent multiple coords in 1 matrix*/
 func matAppend(mat [][]float64, mats... [][]float64) {
-    // use this to represent multiple coords in 1 matrix
     for c := 0; c < len(mat); c++ {
         for _, mat1 := range mats {
             mat[c] = append(mat[c], mat1[c]...)
@@ -75,8 +68,9 @@ func matAppend(mat [][]float64, mats... [][]float64) {
     }
 }
 
+/*returns a 3d vector from the given column no.*/
 func getCoord(mat [][]float64, n int) [][]float64 {
-    return [][]float64 {
+    return [][]float64 { // convert this into a n dimentional instead of jusst 3
         {mat[0][n]},
         {mat[1][n]},
         {mat[2][n]},
@@ -89,7 +83,7 @@ func (cu *cuboid) create(o, u [][]float64) {
     // creating cube parallel to axes by default
     //size := vecSize(u)
     //size = size/2
-    u = [][]float64 {
+    u = [][]float64 { // another method for this is rotating the original u by some angle (pi/2 in case of cubes) in different planes
         {u[0][0], u[0][0], -u[0][0], -u[0][0], u[0][0], u[0][0], -u[0][0], -u[0][0]},
         {u[1][0], u[1][0], u[1][0], u[1][0], -u[1][0], -u[1][0], -u[1][0], -u[1][0]},
         {u[2][0], -u[2][0], -u[2][0], u[2][0], u[2][0], -u[2][0], -u[2][0], u[2][0]},
@@ -99,12 +93,13 @@ func (cu *cuboid) create(o, u [][]float64) {
     cu.coords = matAdd(cu.coords, u)
 }
 
+/*draws the cuboid on canvas*/
 func (cu *cuboid) draw(board []int) {
     vertices := make([][][]float64, 8)
     for i := 0; i < 8; i++ {
         vertices[i] = getCoord(cu.coords, i)
     }
-    for i := 0; i < 4; i++ {
+    for i := 0; i < 4; i++ { // connecting vertices by lines
         line3d(vertices[i], vertices[(i+1)%4], board)
         line3d(vertices[i+4], vertices[4+(i+1)%4], board)
         line3d(vertices[i], vertices[i+4], board)

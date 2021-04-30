@@ -21,6 +21,7 @@ func matMul(mat1, mat2 [][]float64) [][]float64 {
     return result
 }
 
+/*returns the addition of two similarly shaped matrices*/
 func matAdd(mat1, mat2 [][]float64) [][]float64 {
     m1rows, m1cols, m2rows, m2cols := len(mat1), len(mat1[0]), len(mat2), len(mat2[0])
     if !(m1rows == m2rows && m1cols == m2cols) {panic("matAdd shape error")}
@@ -35,6 +36,7 @@ func matAdd(mat1, mat2 [][]float64) [][]float64 {
     return result
 }
 
+/*returns the subtraction of the second matrix from first*/
 func matSub(mat1, mat2 [][]float64) [][]float64 {
     m1rows, m1cols, m2rows, m2cols := len(mat1), len(mat1[0]), len(mat2), len(mat2[0])
     if !(m1rows == m2rows && m1cols == m2cols) {panic("matSub shape error")}
@@ -49,6 +51,7 @@ func matSub(mat1, mat2 [][]float64) [][]float64 {
     return result
 }
 
+/*multiply a scalar to a matrix*/
 func matScale(mat [][]float64, scale float64) [][]float64 {
     mrows, mcols := len(mat), len(mat[0])
     for r := 0; r < mrows; r++ {
@@ -59,7 +62,7 @@ func matScale(mat [][]float64, scale float64) [][]float64 {
     return mat
 }
 
-/*remember to input y and x index resp. *///returns -1^(x+y)*submat */
+/*remember to input y and x index resp. */
 func subMat(mat [][]float64, y, x int) [][]float64 {
     mrows := len(mat)
     var submat [][]float64
@@ -111,6 +114,7 @@ func vecDot(vec1, vec2 [][]float64) float64 {
     return result
 }
 
+/* returns modulus of the no. |n| */
 func absVal(n float64) float64 {
     if n >= 0 {return n} else {return -n}
 }

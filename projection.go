@@ -63,3 +63,10 @@ func line(x1, y1, x2, y2 float64, board []int) {
 func vector(x1, y1, x2, y2 float64, board []int) {
     line(x1, y1, x1+x2, y1+y2, board)
 }
+
+/*rotate x, y about ox, oy by r radians*/
+func rotateP2d(x, y, ox, oy, r float64) (float64, float64) {
+    x, y = x-ox, y-oy
+    x, y =  x*math.Cos(r)-y*math.Sin(r), x*math.Sin(r)+y*math.Cos(r)
+    return x+ox, y+oy
+}
