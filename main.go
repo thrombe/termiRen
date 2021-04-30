@@ -12,8 +12,41 @@ var fov = math.Pi/2.5 //*horizontal // keep this between 0 and pi
 var charRatio = 1.4/2.55 // used only in point() // width/height of a character
 
 func main() {
-	demo2()
-	//fmt.Println(rotateP3d(1, 0, 0))
+    demo4()
+}
+
+func demo4() {
+	o := [][]float64 {{0}, {0}, {30}}
+	u := [][]float64 {{5}, {5}, {5}}
+	//centre := [][]float64 {{4}, {15}, {30}}
+	rot := rotateP3d(0.1, 0.3, 0.2)
+	for {
+		//o = matSub(o, centre)
+		u = matMul(rot, u)
+		//o = matAdd(o, centre)
+		b := cuboid{}
+    	b.create(o, u)
+		board := genB()
+		b.draw(board)
+		printB(board)
+	}
+}
+
+func demo3() {
+	o := [][]float64 {{0}, {0}, {30}}
+	u := [][]float64 {{5}, {5}, {5}}
+	//centre := [][]float64 {{4}, {15}, {30}}
+	rot := rotateP3d(0, 0, 0.2)
+	b := cuboid{}
+	b.create(o, u)
+	for {
+		//o = matSub(o, centre)
+		b.coords = matMul(rot, b.coords)
+		//o = matAdd(o, centre)
+		board := genB()
+		b.draw(board)
+		printB(board)
+	}
 }
 
 func demo2() {

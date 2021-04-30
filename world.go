@@ -62,3 +62,51 @@ func rotateP3d(x, y, z float64) [][]float64 {
     return matMul(rotMat, otherMat)
 }
 
+type cuboid struct{
+    coords [][]float64
+}
+
+func matAppend(mat [][]float64, mats... [][]float64) {
+    // use this to represent multiple coords in 1 matrix
+    for c := 0; c < len(mat); c++ {
+        for _, mat1 := range mats {
+            mat[c] = append(mat[c], mat1[c]...)
+        }
+    }
+}
+
+func getCoord(mat [][]float64, n int) [][]float64 {
+    return [][]float64 {
+        {mat[0][n]},
+        {mat[1][n]},
+        {mat[2][n]},
+    }
+}
+
+func (cu *cuboid) create(o, u [][]float64) {
+    // use displace from centre method, so to rotate the cube,
+    // only that displacement vector needs to be rotated
+    // creating cube parallel to axes by default
+    //size := vecSize(u)
+    //size = size/2
+    u = [][]float64 {
+        {u[0][0], u[0][0], -u[0][0], -u[0][0], u[0][0], u[0][0], -u[0][0], -u[0][0]},
+        {u[1][0], u[1][0], u[1][0], u[1][0], -u[1][0], -u[1][0], -u[1][0], -u[1][0]},
+        {u[2][0], -u[2][0], -u[2][0], u[2][0], u[2][0], -u[2][0], -u[2][0], u[2][0]},
+    }
+    cu.coords = make([][]float64, 3)
+    matAppend(cu.coords, o, o, o, o, o, o, o, o)
+    cu.coords = matAdd(cu.coords, u)
+}
+
+func (cu *cuboid) draw(board []int) {
+    vertices := make([][][]float64, 8)
+    for i := 0; i < 8; i++ {
+        vertices[i] = getCoord(cu.coords, i)
+    }
+    for i := 0; i < 4; i++ {
+        line3d(vertices[i], vertices[(i+1)%4], board)
+        line3d(vertices[i+4], vertices[4+(i+1)%4], board)
+        line3d(vertices[i], vertices[i+4], board)
+    }
+}

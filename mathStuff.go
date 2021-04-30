@@ -7,13 +7,13 @@ import (
 /*multiply matrices uf arbitary sizes(legal only ofc)*/
 func matMul(mat1, mat2 [][]float64) [][]float64 {
     m1rows, m1cols, m2rows, m2cols := len(mat1), len(mat1[0]), len(mat2), len(mat2[0])
-    if m1rows != m2cols {panic("matMul shape error")}
+    if m1cols != m2rows {panic("matMul shape error")}
     result := make([][]float64, m1rows)
     for r := 0; r < m1rows; r++ {
-        row := make([]float64, m2rows)
+        row := make([]float64, m2cols)
         for c := 0; c < m2cols; c++ {
             for item := 0; item < m1cols; item++ {
-                row[item] += mat1[r][item]*mat2[item][c]
+                row[c] += mat1[r][item]*mat2[item][c]
             }
         }
         result[r] = row
