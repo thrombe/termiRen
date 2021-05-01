@@ -34,25 +34,35 @@ func xysquare3d(o [][]float64, side float64, board []int) {
 	line3d(matSub(o, u), matSub(o, v), board)
 }
 
-/*returns rotation matrix of x, y, z angle from respective axes*/
-func rotateP3d(x, y, z float64) [][]float64 {
+/*returns rotation matrix z angle from z axis*/
+func rotateP3dz(z float64) [][]float64 {
     rotMat := [][]float64 { // USE POINTERS FOR TRANSLATION IN 4 BY 4 MATRIX ??!!!!!
         {math.Cos(z), -math.Sin(z), 0},
         {math.Sin(z), math.Cos(z), 0},
         {0, 0, 1},
     }
-    otherMat := [][]float64 { // i cross k is -j
+    // try slapping the 4th row using matAppend() and 4th column manually
+    return rotMat
+}
+
+/*returns rotation matrix of y angle from y axis*/
+func rotateP3dy(y float64) [][]float64 {
+    rotMat := [][]float64 { // i cross k is -j
         {math.Cos(y), 0, math.Sin(y)},
         {0, 1, 0},
         {-math.Sin(y), 0, math.Cos(y)},
     }
-    rotMat = matMul(rotMat, otherMat)
-    otherMat = [][]float64 {
+    return rotMat
+}
+
+/*returns rotation matrix of x angle from x axis*/
+func rotateP3dx(x float64) [][]float64 {
+    rotMat := [][]float64 {
         {1, 0, 0},
         {0, math.Cos(x), -math.Sin(x)},
         {0, math.Sin(x), math.Cos(x)},
-    } // try slapping the 4th row using matAppend() and 4th column manually
-    return matMul(rotMat, otherMat)
+    }
+    return rotMat
 }
 
 type cuboid struct{

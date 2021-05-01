@@ -19,7 +19,8 @@ func demo4() {
 	o := [][]float64 {{0}, {0}, {30}}
 	u := [][]float64 {{5}, {5}, {5}}
 	//centre := [][]float64 {{4}, {15}, {30}}
-	rot := rotateP3d(0.1, 0.3, 0.2)
+	rot := matMul(rotateP3dx(0.1), rotateP3dy(0.3))
+	rot = matMul(rot, rotateP3dz(0.2))
 	for {
 		//o = matSub(o, centre)
 		u = matMul(rot, u)
@@ -36,7 +37,7 @@ func demo3() {
 	o := [][]float64 {{0}, {0}, {30}}
 	u := [][]float64 {{5}, {5}, {5}}
 	//centre := [][]float64 {{4}, {15}, {30}}
-	rot := rotateP3d(0, 0, 0.2)
+	rot := rotateP3dz(0.2)
 	b := cuboid{}
 	b.create(o, u)
 	for {
