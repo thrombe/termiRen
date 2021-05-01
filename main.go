@@ -2,7 +2,7 @@ package main
 
 import (
 	"time"
-	// "fmt"
+	//"fmt"
 	"math"
 )
 
@@ -21,12 +21,10 @@ func demo4() { // morphing cube 3d
 	o := [][]float64 {{0}, {0}, {30}, {1}} // 1 for 4 by 1 matrix
 	u := [][]float64 {{5}, {5}, {5}, {0}} // 0 dosent matter
 	//centre := [][]float64 {{4}, {15}, {30}}
-	rot := matMul(rotateP3dx(0.1), rotateP3dy(0.3))
-	rot = matMul(rot, rotateP3dz(0.2))
+	rot := matMul(rotMat3dx(0.1), rotMat3dy(0.3))
+	rot = matMul(rot, rotMat3dz(0.2))
 	for {
-		//o = matSub(o, centre)
 		u = matMul(rot, u)
-		//o = matAdd(o, centre)
 		b := cuboid{}
     	b.create(o, u)
 		board := genB()
@@ -38,8 +36,8 @@ func demo4() { // morphing cube 3d
 func demo3() { // rotating cube 3d
 	o := [][]float64 {{0}, {0}, {30}, {1}} // 1 for 4 by 1 matrix
 	u := [][]float64 {{5}, {5}, {5}, {0}} // 0 dosent matter here
-	rot := rotateP3dy(0.2)
-	rot = matMul(rotateP3dz(0.25), rot)
+	rot := rotMat3dy(0.2)
+	rot = matMul(rotMat3dz(0.25), rot)
 	rot = rotAboutPoint(rot, o)
 	b := cuboid{}
 	b.create(o, u)

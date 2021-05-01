@@ -52,7 +52,7 @@ func matSub(mat1, mat2 [][]float64) [][]float64 {
 }
 
 /*multiply a scalar to a matrix*/
-func matScale(mat [][]float64, scale float64) [][]float64 {
+func matScalar(mat [][]float64, scale float64) [][]float64 {
     mrows, mcols := len(mat), len(mat[0])
     for r := 0; r < mrows; r++ {
         for c := 0; c < mcols; c++ {
@@ -76,7 +76,7 @@ func subMat(mat [][]float64, y, x int) [][]float64 {
         submat = append(submat, row)
     }
     return submat
-    //return matScale(submat, math.Pow(-1, float64(x+y)))
+    //return matScalar(submat, math.Pow(-1, float64(x+y)))
 }
 
 /*returns determinant of a square matrix*/

@@ -2,14 +2,14 @@ package main
 
 import (
 	"math"
-	// "fmt"
+	//"fmt"
 )
 
 /*converts coords from 3d space to 2d so that it can be drawn on canvas*/
 func projectP(p [][]float64) (float64, float64) { // 3 by 1 vectors
 	z := p[2][0]
 	scrDist := xlim/(math.Tan(fov/2)*2) // this is essentially how far is the screen from eye
-	p = matScale(p, scrDist/(z*math.Tan(fov/2)))
+	p = matScalar(p, scrDist/(z*math.Tan(fov/2)))
 	return p[0][0], p[1][0]
 }
 
@@ -27,8 +27,8 @@ func xysquare3d(o [][]float64, side float64, board []int) { // change this to dr
 	u := [][]float64 {{r2}, {r2}, {0}}
 	v := [][]float64 {{-r2}, {r2}, {0}}
 	diagH := side/math.Sqrt(2)
-	u = matScale(u, diagH)
-	v = matScale(v, diagH)
+	u = matScalar(u, diagH)
+	v = matScalar(v, diagH)
 	line3d(matAdd(o, v), matAdd(o, u), board)
 	line3d(matAdd(o, v), matSub(o, u), board)
 	line3d(matAdd(o, u), matSub(o, v), board)
@@ -36,45 +36,56 @@ func xysquare3d(o [][]float64, side float64, board []int) { // change this to dr
 }
 
 /*returns rotation matrix z angle from z axis*/
-func rotateP3dz(z float64) [][]float64 {
-    rotMat := [][]float64 {
+func rotMat3dz(z float64) [][]float64 {
+    rotmat := [][]float64 {
         {math.Cos(z), -math.Sin(z), 0, 0},
         {math.Sin(z), math.Cos(z), 0, 0},
         {0, 0, 1, 0},
         {0, 0, 0, 1},
     }
-    return rotMat
+    return rotmat
 }
 
 /*returns rotation matrix of y angle from y axis*/
-func rotateP3dy(y float64) [][]float64 {
-    rotMat := [][]float64 { // i cross k is -j
+func rotMat3dy(y float64) [][]float64 {
+    rotmat := [][]float64 { // i cross k is -j
         {math.Cos(y), 0, math.Sin(y), 0},
         {0, 1, 0, 0},
         {-math.Sin(y), 0, math.Cos(y), 0},
         {0, 0, 0, 1},
     }
-    return rotMat
+    return rotmat
 }
 
 /*returns rotation matrix of x angle from x axis*/
-func rotateP3dx(x float64) [][]float64 {
-    rotMat := [][]float64 {
+func rotMat3dx(x float64) [][]float64 {
+    rotmat := [][]float64 {
         {1, 0, 0, 0},
         {0, math.Cos(x), -math.Sin(x), 0},
         {0, math.Sin(x), math.Cos(x), 0},
         {0, 0, 0, 1},
     }
-    return rotMat
+    return rotmat
 }
 
-/*returns translation matrix (subtracts o from coords)*/
-func transnMat(o [][]float64) [][]float64 {
-    return transpMat(matScale(o, -1)) // transpMat ignores the last row of o ans always replaces it with 1
+/*returns a scaling matrix or whatever its called
+s is the scale factor and matsize is the len of square mat
+multiply a vector with it(vector to the right), and everything
+except the last row will be scaled*/
+func scaleMat(s float64, matsize int) [][]float64 {
+    result := make([][]float64, matsize)
+    for i := 0; i < matsize ; i++ {
+        row := make([]float64, matsize)
+        row[i] = s
+        result[i] = row
+    }
+    result[matsize-1][matsize-1] = 1
+    return result
 }
 
 /*returns translation matrix (adds o to coords)*/
-func transpMat(o [][]float64) [][]float64 {
+func transMat(o [][]float64) [][]float64 {
+    if len(o[0]) != 1 {panic("transMat matrix shape error")}
     length := len(o)
     trans := make([][]float64, length)
     for i, ele := range o {
@@ -82,14 +93,12 @@ func transpMat(o [][]float64) [][]float64 {
         row[i] = 1
         trans[i] = row
     }
-    row := []float64 {0, 0, 0, 1}
-    trans[length-1] = row
     return trans
 }
 
 /*adds back and forth translation to rotation matrix*/
 func rotAboutPoint(rot ,o [][]float64) [][]float64 {
-    return matMul(transpMat(o), matMul(rot, transnMat(o)))
+    return matMul(transMat(o), matMul(rot, transMat(matMul(scaleMat(-1, len(o)), o))))
 }
 
 type cuboid struct{

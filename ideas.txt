@@ -15,6 +15,11 @@
     . quarternion to 4×4 matrix conversion
     . euler angle conversion?
 3. projection matrix for projecting to 2d and depth buffer
+4. draw circle
+    . using unit vector, rotation vector, 2pi*r instead of drawing points at distance r from centre
+    . or maybe draw using lines
+    . or some better algorithm
+    . create the siney circle (circle around y, with y += sin(angle) angle is variable)
 
 
 .  remember to
