@@ -1,9 +1,11 @@
 package main
+
 import (
 	"time"
-	//"fmt"
+	// "fmt"
 	"math"
 )
+
 // REMEMBER TO USE POINTERS and fix printB()
 // KEEP Z COORD +VE
 const xlim = 151
@@ -12,12 +14,12 @@ var fov = math.Pi/2.5 //*horizontal // keep this between 0 and pi
 var charRatio = 1.4/2.55 // used only in point() // width/height of a character
 
 func main() {
-    demo4()
+    demo3()
 }
 
-func demo4() {
-	o := [][]float64 {{0}, {0}, {30}}
-	u := [][]float64 {{5}, {5}, {5}}
+func demo4() { // morphing cube 3d
+	o := [][]float64 {{0}, {0}, {30}, {1}} // 1 for 4 by 1 matrix
+	u := [][]float64 {{5}, {5}, {5}, {0}} // 0 dosent matter
 	//centre := [][]float64 {{4}, {15}, {30}}
 	rot := matMul(rotateP3dx(0.1), rotateP3dy(0.3))
 	rot = matMul(rot, rotateP3dz(0.2))
@@ -33,24 +35,23 @@ func demo4() {
 	}
 }
 
-func demo3() {
-	o := [][]float64 {{0}, {0}, {30}}
-	u := [][]float64 {{5}, {5}, {5}}
-	//centre := [][]float64 {{4}, {15}, {30}}
-	rot := rotateP3dz(0.2)
+func demo3() { // rotating cube 3d
+	o := [][]float64 {{0}, {0}, {30}, {1}} // 1 for 4 by 1 matrix
+	u := [][]float64 {{5}, {5}, {5}, {0}} // 0 dosent matter here
+	rot := rotateP3dy(0.2)
+	rot = matMul(rotateP3dz(0.25), rot)
+	rot = rotAboutPoint(rot, o)
 	b := cuboid{}
 	b.create(o, u)
 	for {
-		//o = matSub(o, centre)
 		b.coords = matMul(rot, b.coords)
-		//o = matAdd(o, centre)
 		board := genB()
 		b.draw(board)
 		printB(board)
 	}
 }
 
-func demo2() {
+func demo2() { // 2 moving squares 3d
 	fov = math.Pi/2.7
 	var x float64 = -20
 	var y float64 = 20
@@ -61,6 +62,7 @@ func demo2() {
 			{0+x},
 			{0+y},
 			{z},
+			{1}, // 1 for 4 by 1 matrix
 		}
 		board := genB()
 		point(0, 0, board)
@@ -72,7 +74,7 @@ func demo2() {
 	}
 }
 
-func demo() {
+func demo() { // 2d rotating line
     fov = math.Pi/1.15
     var x1, y1, x2, y2 float64 = 5, 6, 28, 31
     var rx, ry float64 = 5, -3

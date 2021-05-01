@@ -4,7 +4,7 @@ import (
     "math"
 )
 
-/*multiply matrices uf arbitary sizes(legal only ofc)*/
+/*multiply matrices of arbitary sizes(legal only ofc)*/
 func matMul(mat1, mat2 [][]float64) [][]float64 {
     m1rows, m1cols, m2rows, m2cols := len(mat1), len(mat1[0]), len(mat2), len(mat2[0])
     if m1cols != m2rows {panic("matMul shape error")}
