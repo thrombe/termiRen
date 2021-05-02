@@ -7,7 +7,7 @@ import (
 
 /*converts coords from 3d space to 2d so that it can be drawn on canvas*/
 func projectP(p [][]float64) (float64, float64) { // 3 by 1 vectors
-	z := p[2][0]
+	z := -p[2][0] // -ve sign fixes the convention bug (camera faces -z. so as to keep x to right and y up)
 	scrDist := xlim/(math.Tan(fov/2)*2) // this is essentially how far is the screen from eye
 	p = matScalar(p, scrDist/(z*math.Tan(fov/2)))
 	return p[0][0], p[1][0]
@@ -114,8 +114,8 @@ func rotAboutVec(angle float64, axis [][]float64) [][]float64 {
     y := math.Atan2(axis[2][0], axis[0][0]) // tan^-1(z/x)
     z := math.Atan2(axis[1][0], axis[0][0]) // tan^-1(y/x)
     rot := rotMat3dx(angle)
-    ry := rotMat3dy(-y)
-    ryinv := rotMat3dy(y)
+    ry := rotMat3dy(y)
+    ryinv := rotMat3dy(-y)
     rz := rotMat3dz(-z)
     rzinv := rotMat3dz(z)
     return nMatMul(ryinv, rzinv, rot, rz, ry)
