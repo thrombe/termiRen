@@ -21,6 +21,17 @@ func matMul(mat1, mat2 [][]float64) [][]float64 {
     return result
 }
 
+/*multiply any no. of matrices (in order)*/
+func nMatMul(mats...[][]float64) [][]float64 {
+    length := len(mats)
+    var result [][]float64
+    result = mats[0]
+    for i := 1; i < length; i++ {
+        result = matMul(result, mats[i])
+    }
+    return result
+}
+
 /*returns the addition of two similarly shaped matrices*/
 func matAdd(mat1, mat2 [][]float64) [][]float64 {
     m1rows, m1cols, m2rows, m2cols := len(mat1), len(mat1[0]), len(mat2), len(mat2[0])

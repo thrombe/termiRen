@@ -96,9 +96,29 @@ func transMat(o [][]float64) [][]float64 {
     return trans
 }
 
+func transMatInv(o [][]float64) [][]float64 {
+    return transMat(matMul(scaleMat(-1, len(o)), o))
+}
+
 /*adds back and forth translation to rotation matrix*/
 func rotAboutPoint(rot ,o [][]float64) [][]float64 {
-    return matMul(transMat(o), matMul(rot, transMat(matMul(scaleMat(-1, len(o)), o))))
+    // return matMul(transMat(o), matMul(rot, transMat(matMul(scaleMat(-1, len(o)), o))))
+    // return nMatMul(transMat(o), rot, transMat(matMul(scaleMat(-1, len(o)), o)))
+    return nMatMul(transMat(o), rot, transMatInv(o))
+}
+
+/*axis passes through the origin. (translate to other point to get other axes)*/
+func rotAboutVec(angle float64, axis [][]float64) [][]float64 {
+    // y and z are angles around y and z axes.
+    // transforming the axis into x-axis
+    y := math.Atan2(axis[2][0], axis[0][0]) // tan^-1(z/x)
+    z := math.Atan2(axis[1][0], axis[0][0]) // tan^-1(y/x)
+    rot := rotMat3dx(angle)
+    ry := rotMat3dy(-y)
+    ryinv := rotMat3dy(y)
+    rz := rotMat3dz(-z)
+    rzinv := rotMat3dz(z)
+    return nMatMul(ryinv, rzinv, rot, rz, ry)
 }
 
 type cuboid struct{

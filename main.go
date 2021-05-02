@@ -7,7 +7,7 @@ import (
 )
 
 // REMEMBER TO USE POINTERS and fix printB()
-// KEEP Z COORD +VE
+// KEEP Z COORD -ve (camera is facing -z)
 const xlim = 151
 const ylim = 163
 var fov = math.Pi/2.5 //*horizontal // keep this between 0 and pi
@@ -34,10 +34,10 @@ func demo4() { // morphing cube 3d
 }
 
 func demo3() { // rotating cube 3d
-	o := [][]float64 {{0}, {0}, {30}, {1}} // 1 for 4 by 1 matrix
+	o := [][]float64 {{0}, {0}, {-30}, {1}} // 1 for 4 by 1 matrix
 	u := [][]float64 {{5}, {5}, {5}, {0}} // 0 dosent matter here
-	rot := rotMat3dy(0.2)
-	rot = matMul(rotMat3dz(0.25), rot)
+	axis := [][]float64 {{9}, {9}, {-9}, {0}}
+	rot := rotAboutVec(0.2, axis)
 	rot = rotAboutPoint(rot, o)
 	b := cuboid{}
 	b.create(o, u)
