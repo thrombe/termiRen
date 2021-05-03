@@ -1,9 +1,10 @@
 package main
 
 import (
-	"time"
+	// "time"
 	//"fmt"
 	"math"
+	"seehuhn.de/go/ncurses"
 )
 
 // REMEMBER TO USE POINTERS and fix printB()
@@ -12,9 +13,11 @@ const xlim = 151
 const ylim = 163
 var fov = math.Pi/2.5 //*horizontal // keep this between 0 and pi
 var charRatio = 1.4/2.55 // used only in point() // width/height of a character
+const ncursed = 1 // print using ncurses if 1 else just fmt.print
 
 func main() {
     demo3()
+    if ncursed == 1 {ncurses.EndWin()}
 }
 
 func demo4() { // morphing cube 3d
@@ -23,13 +26,14 @@ func demo4() { // morphing cube 3d
 	//centre := [][]float64 {{4}, {15}, {30}}
 	rot := matMul(rotMat3dx(0.1), rotMat3dy(0.3))
 	rot = matMul(rot, rotMat3dz(0.2))
-	for {
+	board := genB()
+	printy := perint(board)
+	for i := 0; i < 200; i++ {
 		u = matMul(rot, u)
 		b := cuboid{}
     	b.create(o, u)
-		board := genB()
 		b.draw(board)
-		printB(board)
+		printy()
 	}
 }
 
@@ -42,11 +46,12 @@ func demo3() { // rotating cube 3d
 	rot = rotAboutPoint(rot, o)
 	b := cuboid{}
 	b.create(o, u)
-	for {
+	board := genB()
+	printy := perint(board)
+	for i := 0; i < 200; i++ {
 		b.coords = matMul(rot, b.coords)
-		board := genB()
 		b.draw(board)
-		printB(board)
+		printy()
 	}
 }
 
@@ -55,6 +60,8 @@ func demo2() { // 2 moving squares 3d
 	var x float64 = -20
 	var y float64 = 20
 	var z float64 = 70
+	board := genB()
+	printy := perint(board)
 	for i := -15; i <= 15; i++ {
 		x = float64(i)
 		p := [][]float64 {
@@ -63,13 +70,12 @@ func demo2() { // 2 moving squares 3d
 			{z},
 			{1}, // 1 for 4 by 1 matrix
 		}
-		board := genB()
 		point(0, 0, board)
 		// p[2][0] = z
 		xysquare3d(p, 15, board)
 		p[2][0] = z+15
 		xysquare3d(p, 15, board)
-		printB(board)
+		printy()
 	}
 }
 
@@ -78,12 +84,12 @@ func demo() { // 2d rotating line
     var x1, y1, x2, y2 float64 = 5, 6, 28, 31
     var rx, ry float64 = 5, -3
     var r float64 = 0.2
+	board := genB()
+	printy := perint(board)
     for i:= 0; i < 250; i++ {
-        board := genB()
         line(x1, y1, x2, y2, board)
         point(rx, ry, board)
-        printB(board)
-        time.Sleep(time.Millisecond*100)
+		printy()
         x1, y1 = rotateP2d(x1, y1, rx, ry, r)
         x2, y2 = rotateP2d(x2, y2, rx, ry, r)
     }

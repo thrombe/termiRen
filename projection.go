@@ -3,20 +3,42 @@ import (
     "fmt"
     "math"
     "strings"
+    "seehuhn.de/go/ncurses"
+    "time"
     )
 
-func printB(board []int) {
+func perint(board []int) func() {
+    if ncursed == 1 {
+        win := ncurses.Init()
+        ncurses.CursSet(0)
+        return func() {
+            scr := printB(board)
+            time.Sleep(time.Millisecond*50)
+            win.Erase()
+            win.AddStr(scr)
+            win.Refresh()
+        }
+    } else {
+        return func() {
+            fmt.Println(printB(board))
+        }
+    }
+}
+
+func printB(board []int) string {
     var scr strings.Builder
     for y := 0; y < ylim; y++ {
         for x := 0; x < xlim; x++ {
             if board[x+y*xlim] == 1 {
                 scr.WriteString(".")
+                board[x+y*xlim] = 0
             } else {scr.WriteString(" ")}
         }
         scr.WriteString("\n")
     }
-    fmt.Println(scr.String())
-    //fmt.Println(0)
+    // try returning the rune slice instead. this method copies the string while returning
+    return scr.String()
+    //fmt.Println(scr.String())
 }
 
 /*make a canvas. might be useful to use float to be able to have brightness and stuff*/

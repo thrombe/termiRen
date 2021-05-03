@@ -20,12 +20,18 @@
     . or maybe draw using lines
     . or some better algorithm
     . create the siney circle (circle around y, with y += sin(angle) angle is variable)
+5. clipping
+    . either clip before the rotation cum projection matrix, or clip in the projected space
+      . to clip before, we can create moving player objects with fixed six planes (essentially just
+        some normal vectors and some points)
+      . though clipping after projection has an advantage of having simpler normals to planes
 
 
 .  remember to
     . change the printing method, so that points outside the screen dont crash the program
     . change board to [][]
     . change printing to something smarter
+      . a := []rune("xxxxxxx") fmt.Println(string(a)) . this works!
     /. try: big scrDist and objects within that and origin(closer to screen)
           - cant really do this cuz i got fov now.
     . try: 1/(z-scrDist) and scrDist/(z+scrDist) in projectP3d

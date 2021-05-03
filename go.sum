@@ -1,0 +1,4 @@
+golang.org/x/sys v0.0.0-20210317225723-c4fcb01b228e h1:XNp2Flc/1eWQGk5BLzqTAN7fQIwIbfyVTuVxXxZh73M=
+golang.org/x/sys v0.0.0-20210317225723-c4fcb01b228e/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=
+seehuhn.de/go/ncurses v0.2.0 h1:ZV256n0GIMVEHJnECliGMffzdFsEoT7krJqdfGoYD1E=
+seehuhn.de/go/ncurses v0.2.0/go.mod h1:oAc9Y+UN0tflNV0iME++z0ij9uNmIjdxQFkpGoRMd2E=
