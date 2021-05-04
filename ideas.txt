@@ -25,10 +25,20 @@
       . to clip before, we can create moving player objects with fixed six planes (essentially just
         some normal vectors and some points)
       . though clipping after projection has an advantage of having simpler normals to planes
+6. managing objects
+    . create an interface with draw()
+      . put all objects in an array in the interface
+      . loop over them to draw each
+    . manage another rotation matrix connected to each objest that defines its rotation per frame
+      . if objects rotates continuously, the matrix is not identity matrix
+      . if matrix stops rotation after some time, it the matrix changes into identity matrix after 
+        after some time
+    . to rotate everything around player, a single camera matrix is multiplied with every coord
+      perhaps save it with the player
 
 
 .  remember to
-    . change the printing method, so that points outside the screen dont crash the program
+    /. change the printing method, so that points outside the screen dont crash the program
     . change board to [][]
     . change printing to something smarter
       . a := []rune("xxxxxxx") fmt.Println(string(a)) . this works!

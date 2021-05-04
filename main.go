@@ -17,9 +17,52 @@ const ncursed = 1 // print using ncurses if 1 else just fmt.print
 
 func main() {
     if ncursed == 1 {defer ncurses.EndWin()}
-    demo3()
+    demo5()
+    // return
+    // win := ncurses.Init()
+    // a := string(win.GetCh())
+    // win.AddStr(a+ a+ a+ a+ a+ a)
+    // win.Println(a, a, a, a)
+    // win.GetCh()
+    // win.Refresh()
 }
 
+func demo5() { // rotating cube 3d with a cam
+	o := [][]float64 {{5}, {5}, {-30}, {1}} // 1 for 4 by 1 matrix
+	u := [][]float64 {{5}, {5}, {5}, {0}} // 0 dosent matter here
+	axis := [][]float64 {{1}, {1}, {-1}, {0}}
+	rot := rotAboutVec(0.2, axis)
+	//rot := rotMat3dy(0.2)
+	rot = rotAboutPoint(rot, o)
+	b := cuboid{}
+	b.create(o, u)
+	board := genB()
+	win, printy := perint(board)
+
+	matchan := make(chan [][]float64)
+	camPos, camDir := camInit()
+	go detectKey(&camPos, &camDir, win, matchan)
+	rotD := transMat(camPos)
+
+
+	for i := 0; i < 500; i++ {
+		// time.Sleep(time.Millisecond*50)/////////
+		select {
+		case mat := <- matchan:
+			rotD = mat//matMul(mat, rotD)
+			// win.Println(0, 1, camPos)/////////
+			// win.Refresh()///////////	
+		default:
+		}
+		b.coords = matMul(rot, b.coords)
+		coords := matMul(rotD, b.coords)
+		b.draw(board, coords)
+		printy()
+		// _ = printy
+	}
+}
+
+/*
 func demo4() { // morphing cube 3d
 	o := [][]float64 {{0}, {0}, {30}, {1}} // 1 for 4 by 1 matrix
 	u := [][]float64 {{5}, {5}, {5}, {0}} // 0 dosent matter
@@ -27,7 +70,7 @@ func demo4() { // morphing cube 3d
 	rot := matMul(rotMat3dx(0.1), rotMat3dy(0.3))
 	rot = matMul(rot, rotMat3dz(0.2))
 	board := genB()
-	printy := perint(board)
+	_, printy := perint(board)
 	for i := 0; i < 200; i++ {
 		u = matMul(rot, u)
 		b := cuboid{}
@@ -40,14 +83,14 @@ func demo4() { // morphing cube 3d
 func demo3() { // rotating cube 3d
 	o := [][]float64 {{5}, {5}, {-30}, {1}} // 1 for 4 by 1 matrix
 	u := [][]float64 {{5}, {5}, {5}, {0}} // 0 dosent matter here
-	axis := [][]float64 {{9}, {9}, {-9}, {0}}
+	axis := [][]float64 {{1}, {1}, {-1}, {0}}
 	rot := rotAboutVec(0.2, axis)
 	//rot := rotMat3dy(0.2)
 	rot = rotAboutPoint(rot, o)
 	b := cuboid{}
 	b.create(o, u)
 	board := genB()
-	printy := perint(board)
+	_, printy := perint(board)
 	for i := 0; i < 200; i++ {
 		b.coords = matMul(rot, b.coords)
 		b.draw(board)
@@ -61,7 +104,7 @@ func demo2() { // 2 moving squares 3d
 	var y float64 = 20
 	var z float64 = 70
 	board := genB()
-	printy := perint(board)
+	_, printy := perint(board)
 	for i := -15; i <= 15; i++ {
 		x = float64(i)
 		p := [][]float64 {
@@ -85,7 +128,7 @@ func demo() { // 2d rotating line
     var rx, ry float64 = 5, -3
     var r float64 = 0.2
 	board := genB()
-	printy := perint(board)
+	_, printy := perint(board)
     for i:= 0; i < 250; i++ {
         line(x1, y1, x2, y2, board)
         point(rx, ry, board)
@@ -94,3 +137,4 @@ func demo() { // 2d rotating line
         x2, y2 = rotateP2d(x2, y2, rx, ry, r)
     }
 }
+*/

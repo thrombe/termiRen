@@ -7,12 +7,12 @@ import (
     "time"
     )
 
-func perint(board []int) func() {
+func perint(board []int) (*ncurses.Window, func()) {
     if ncursed == 1 {
         win := ncurses.Init()
         // xlim, ylim = win.GetMaxYX() // donno if its x, y or y, x
         ncurses.CursSet(0)
-        return func() {
+        return win, func() {
             scr := printB(board)
             time.Sleep(time.Millisecond*50)
             win.Erase()
@@ -20,7 +20,7 @@ func perint(board []int) func() {
             win.Refresh()
         }
     } else {
-        return func() {
+        return nil, func() {
             fmt.Println(printB(board))
         }
     }

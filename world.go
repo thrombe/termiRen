@@ -159,10 +159,10 @@ func (cu *cuboid) create(o, u [][]float64) {
 }
 
 /*draws the cuboid on canvas*/
-func (cu *cuboid) draw(board []int) {
+func (cu *cuboid) draw(board []int, coords [][]float64) {
     vertices := make([][][]float64, 8)
     for i := 0; i < 8; i++ {
-        vertices[i] = getCoord3d(cu.coords, i)
+        vertices[i] = getCoord3d(coords, i)
     }
     for i := 0; i < 4; i++ { // connecting vertices by lines
         line3d(vertices[i], vertices[(i+1)%4], board)
