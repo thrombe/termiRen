@@ -2,7 +2,7 @@ package main
 
 import (
 	// "time"
-	//"fmt"
+	// "fmt"
 	"math"
 	"seehuhn.de/go/ncurses"
 )
@@ -16,8 +16,8 @@ var charRatio = 1.4/2.55 // used only in point() // width/height of a character
 const ncursed = 1 // print using ncurses if 1 else just fmt.print
 
 func main() {
+    if ncursed == 1 {defer ncurses.EndWin()}
     demo3()
-    if ncursed == 1 {ncurses.EndWin()}
 }
 
 func demo4() { // morphing cube 3d

@@ -10,6 +10,7 @@ import (
 func perint(board []int) func() {
     if ncursed == 1 {
         win := ncurses.Init()
+        // xlim, ylim = win.GetMaxYX() // donno if its x, y or y, x
         ncurses.CursSet(0)
         return func() {
             scr := printB(board)

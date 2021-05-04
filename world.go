@@ -8,7 +8,7 @@ import (
 /*converts coords from 3d space to 2d so that it can be drawn on canvas*/
 func projectP(p [][]float64) (float64, float64) { // 3 by 1 vectors
 	z := -p[2][0] // -ve sign fixes the convention bug (camera faces -z. so as to keep x to right and y up)
-	scrDist := xlim/(math.Tan(fov/2)*2) // this is essentially how far is the screen from eye
+	scrDist := float64(xlim)/(math.Tan(fov/2)*2) // this is essentially how far is the screen from eye
 	p = matScalar(p, scrDist/(z*math.Tan(fov/2)))
 	return p[0][0], p[1][0]
 }
