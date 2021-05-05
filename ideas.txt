@@ -46,3 +46,5 @@
           - cant really do this cuz i got fov now.
     . try: 1/(z-scrDist) and scrDist/(z+scrDist) in projectP3d
     . make a demo showing fov change with time
+    . rotation is slightly borken (not accurate)
+      . i dont understand why

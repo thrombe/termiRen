@@ -2,7 +2,7 @@ package main
 
 import (
 	"math"
-	//"fmt"
+	// "fmt"
 )
 
 /*converts coords from 3d space to 2d so that it can be drawn on canvas*/
