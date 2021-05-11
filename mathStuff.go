@@ -102,6 +102,20 @@ func matDet(mat [][]float64) float64 {
     return result
 }
 
+/*returns transpose of a matrix*/
+func matTranspose(mat [][]float64) [][]float64 {
+    nrows, ncols := len(mat[0]), len(mat)
+    result := make([][]float64, nrows)
+    for r := 0; r < nrows; r++ {
+        row := make([]float64, ncols)
+        for c := 0; c < ncols; c++ {
+            row[c] = mat[c][r]
+        }
+        result[r] = row
+    }
+    return result
+}
+
 /*returns the size of a n-dimentional vector*/
 func vecSize(vec [][]float64) float64 {
     if len(vec[0]) > 1 {panic("vecSize not a vector")}
@@ -111,6 +125,17 @@ func vecSize(vec [][]float64) float64 {
         result += vec[r][0] * vec[r][0]
     }
     return math.Sqrt(result)
+}
+
+/*returns unit vector in the same direction*/
+func vecUnit(vec [][]float64) [][]float64 {
+    size := vecSize(vec)
+    rows := len(vec)
+    result := make([][]float64, rows)
+    for r := 0; r < rows; r++ {
+        result[r] = []float64 {vec[r][0]/size}
+    }
+    return result
 }
 
 /*returns dot of 2 vectors*/

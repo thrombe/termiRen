@@ -4,7 +4,7 @@ import (
     "math"
     "strings"
     "seehuhn.de/go/ncurses"
-    "time"
+    // "time"
     )
 
 func perint(board []int) (*ncurses.Window, func()) {
@@ -14,7 +14,7 @@ func perint(board []int) (*ncurses.Window, func()) {
         ncurses.CursSet(0)
         return win, func() {
             scr := printB(board)
-            time.Sleep(time.Millisecond*50)
+            // time.Sleep(time.Millisecond*50)
             win.Erase()
             win.AddStr(scr)
             win.Refresh()
@@ -75,8 +75,12 @@ func point(h, k float64, board []int) {
 /*draw line on canvas*/
 func line(x1, y1, x2, y2 float64, board []int) {
     length := math.Sqrt((x2-x1)*(x2-x1) + (y2-y1)*(y2-y1))
+    if round(length) == 0 { // if line is too small, just draw a point
+        point(x1, y1, board)
+        return
+    }
     ux, uy := (x2-x1)/length, (y2-y1)/length
-    for math.Round(2*((x2-x1)*(x2-x1)+(y2-y1)*(y2-y1))) != 0 {
+    for math.Round(2*((x2-x1)*(x2-x1)+(y2-y1)*(y2-y1))) != 0 { // that 2 there is for resolution of line
         point(x1, y1, board)
         x1, y1 = x1+ux, y1+uy
     }

@@ -14,7 +14,7 @@
       1 rotation about a given axis
     . quarternion to 4×4 matrix conversion
     . euler angle conversion?
-3. projection matrix for projecting to 2d and depth buffer
+/3. projection matrix for projecting to 2d and depth buffer
 4. draw circle
     . using unit vector, rotation vector, 2pi*r instead of drawing points at distance r from centre
     . or maybe draw using lines
@@ -35,9 +35,14 @@
         after some time
     . to rotate everything around player, a single camera matrix is multiplied with every coord
       perhaps save it with the player
+7. gravitation simulation 3d
+8. for temporary z-buffer thing
+    . take average of the coords of triangle
+    . sort triangles acc to z
+    . draw them in this order
 
 
-.  remember to
+. remember to
     /. change the printing method, so that points outside the screen dont crash the program
     . change board to [][]
     . change printing to something smarter
@@ -48,3 +53,14 @@
     . make a demo showing fov change with time
     . rotation is slightly borken (not accurate)
       . i dont understand why
+    . fix camtices in world.go
+    . add roll to camera.go
+    /. fix line() in projection.go - /length can cause issues
+    
+
+. plan
+    . projection matrix instead of the current methods
+    . profiling to see whats slowing down
+    . clipping the bounding boxes of triangles to the screen limit
+    . add the wait delay in parallel somehow
+    . dot product with normal defines the brightness
