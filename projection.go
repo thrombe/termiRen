@@ -4,7 +4,6 @@ import (
     "math"
     "strings"
     "seehuhn.de/go/ncurses"
-    // "time"
     )
 
 func perint(board []int) (*ncurses.Window, func()) {
@@ -54,10 +53,10 @@ func genB() []int {
     // }
 }
 
-//USELESS /*enter index of pixel in canvas and return coors in space*/
-func giveCoords(x, y int) (float64, float64) {
-    return float64(x-int(xlim/2)), float64(-y+int(ylim/2)) 
-}
+// //USELESS /*enter index of pixel in canvas and return coors in space*/
+// func giveCoords(x, y int) (float64, float64) {
+//     return float64(x-int(xlim/2)), float64(-y+int(ylim/2)) 
+// }
 
 /*enter coords of points and return index in canvas*/
 func giveInd(x, y float64) (int, int) {
@@ -73,7 +72,8 @@ func point(h, k float64, board []int) {
 }
 
 /*draw line on canvas*/
-func line(x1, y1, x2, y2 float64, board []int) {
+func line(v1, v2 [][]float64, board []int) {
+    x1, y1, x2, y2 := v1[0][0], v1[1][0], v2[0][0], v2[1][0]
     length := math.Sqrt((x2-x1)*(x2-x1) + (y2-y1)*(y2-y1))
     if round(length) == 0 { // if line is too small, just draw a point
         point(x1, y1, board)
@@ -86,14 +86,14 @@ func line(x1, y1, x2, y2 float64, board []int) {
     }
 }
 
-/*draw vector with x1, y1 as offset and x2, y2 as direction and size*/
-func vector(x1, y1, x2, y2 float64, board []int) {
-    line(x1, y1, x1+x2, y1+y2, board)
+/*draw vector with v1 as offset and v2 as direction and size*/
+func vector(v1, v2 [][]float64, board []int) {
+    line(v1, matAdd(v1, v2), board)
 }
 
-/*rotate x, y about ox, oy by r radians*/
-func rotateP2d(x, y, ox, oy, r float64) (float64, float64) {
-    x, y = x-ox, y-oy
-    x, y =  x*math.Cos(r)-y*math.Sin(r), x*math.Sin(r)+y*math.Cos(r)
-    return x+ox, y+oy
-}
+// /*rotate x, y about ox, oy by r radians*/
+// func rotateP2d(x, y, ox, oy, r float64) (float64, float64) {
+//     x, y = x-ox, y-oy
+//     x, y =  x*math.Cos(r)-y*math.Sin(r), x*math.Sin(r)+y*math.Cos(r)
+//     return x+ox, y+oy
+// }

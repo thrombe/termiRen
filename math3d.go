@@ -2,12 +2,27 @@ package main
 
 import "math"
 
-/*converts coords from 3d space to 2d so that it can be drawn on canvas*/
-func projectP(p [][]float64) (float64, float64) { // 3 by 1 vectors
-	z := -p[2][0] // -ve sign fixes the convention bug (camera faces -z. so as to keep x to right and y up)
-	scrDist := float64(xlim)/(math.Tan(fov/2)*2) // this is essentially how far is the screen from eye
-	p = matScalar(p, scrDist/(z*math.Tan(fov/2)))
-	return p[0][0], p[1][0]
+// /*converts coords from 3d space to 2d so that it can be drawn on canvas*/
+// func projectP(p [][]float64) (float64, float64) { // 3 by 1 vectors
+// 	z := -p[2][0] // -ve sign fixes the convention bug (camera faces -z. so as to keep x to right and y up)
+// 	scrDist := float64(xlim)/(math.Tan(fov/2)*2) // this is essentially how far is the screen from eye
+// 	p = matScalar(p, scrDist/(z*math.Tan(fov/2))) // is there a extra cot here?????
+// 	return p[0][0], p[1][0]
+// }
+
+/*returns projection matrix with 1 and 1000 as near and far*/
+func projectionMat() [][]float64 {
+    cot := 1/math.Tan(fov/2)
+    // scrDist := float64(xlim)*cot/2
+    f := 1000.0
+    n := 1.0
+    scale := float64(xlim)/2
+    return [][]float64 {
+        {cot*scale, 0, 0, 0},
+        {0, cot*scale, 0, 0},
+        {0, 0, (f+n)/(f-n), (2*f*n)/(f-n)},
+        {0, 0, -1, 0},
+    }
 }
 
 /*returns rotation matrix z angle from z axis*/
@@ -122,5 +137,6 @@ func getCoord3d(mat [][]float64, n int) [][]float64 {
         {mat[0][n]},
         {mat[1][n]},
         {mat[2][n]},
+        {mat[3][n]},
     }
 }

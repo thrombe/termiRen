@@ -44,6 +44,7 @@ func demo6() { // testing the tringle. if it is drawn when it should not be. (it
 	camPos, camDir := camInit()
 	go detectKey(&camPos, &camDir, win, matchan, quitchan)
 	camMat := transMat(camPos) // default value
+	camMat = matMul(projectionMat(), camMat)
 
 	loop: for { // press q to quit
 		select {
@@ -51,12 +52,16 @@ func demo6() { // testing the tringle. if it is drawn when it should not be. (it
 		case <- quitchan: break loop
 		default:
 		}
-		t.transform(rot, t.vertices)
-		vertices := make([][][]float64, 3)
-		copy(vertices, t.vertices)
+		transform(rot, t.vertices)
+		t.camtices = make([][][]float64, 3)
+		copy(t.camtices, t.vertices)
 
-		t.transform(camMat, vertices)
-		t.fill(board, vertices)
+		transform(camMat, t.camtices)
+		// t.draw(board)
+		t.fill(board, &camPos)
+		// poin := matMul(camMat, camPos)
+		// vec := matMul(camMat, camDir)
+		// vector(poin, vec, board)
 		printy()
 	}
 }
@@ -86,8 +91,8 @@ func demo5() { // rotating cube 3d with a cam
 		default:
 		}
 		b.coords = matMul(rot, b.coords)
-		coords := matMul(camMat, b.coords)
-		b.draw(board, coords)
+		b.camoords = matMul(camMat, b.coords)
+		b.draw(board)
 		printy()
 		time.Sleep(time.Millisecond*50)
 	}

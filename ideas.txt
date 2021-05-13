@@ -38,7 +38,7 @@
 7. gravitation simulation 3d
 8. for temporary z-buffer thing
     . take average of the coords of triangle
-    . sort triangles acc to z
+    . sort triangles acc to z after projection
     . draw them in this order
 
 
@@ -51,16 +51,30 @@
           - cant really do this cuz i got fov now.
     . try: 1/(z-scrDist) and scrDist/(z+scrDist) in projectP3d
     . make a demo showing fov change with time
-    . rotation is slightly borken (not accurate)
-      . i dont understand why
+    /. rotation is slightly borken (not accurate)
+      /. i dont understand why
     . fix camtices in world.go
     . add roll to camera.go
     /. fix line() in projection.go - /length can cause issues
+    . move the dividing by w in tri.transform() from tri.fill()
     
 
 . plan
-    . projection matrix instead of the current methods
+    /. projection matrix instead of the current methods
     . profiling to see whats slowing down
     . clipping the bounding boxes of triangles to the screen limit
     . add the wait delay in parallel somehow
     . dot product with normal defines the brightness
+
+. bugs
+    . rotation not accurate
+      . cube rotation along diagonal
+    /. triangle.fill() or inTriangle() is broken
+      /. triangle disappears even with the dot product test disabled
+    /. the dot product test in triangle is broken
+      /. maybe cuz of bad campos and camdir
+        /. move up/down broken
+    /. point() draw() line() and stuff broken cuz projection mat
+    /. rotation around cube seems broken
+    /. the projection of cube also seems broken
+      /. maybe cuz of the extra cot
