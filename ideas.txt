@@ -1,20 +1,10 @@
-/1. for objects
-    . make class of diff objects, with class.draw() for drawing,
-      class.rotate(), etc
-        eg( 
-          cube:
-            centre = ..
-            side = ..
-            coords = (in terms of centre and side. so that changing centre translates the cube)
-            // if coords not like above, we can try translate() or just 4 by 4 matrix in rotate()
-          )
+
 2. implement quarternion math and use it for rotations in 3d
     . struct with w, x, y, z attributes and print, size, etc methods
     . allows to get otations about any axis without doing 7 matrix multiplications just for 
       1 rotation about a given axis
     . quarternion to 4×4 matrix conversion
     . euler angle conversion?
-/3. projection matrix for projecting to 2d and depth buffer
 4. draw circle
     . using unit vector, rotation vector, 2pi*r instead of drawing points at distance r from centre
     . or maybe draw using lines
@@ -43,7 +33,6 @@
 
 
 . remember to
-    /. change the printing method, so that points outside the screen dont crash the program
     . change board to [][]
     . change printing to something smarter
       . a := []rune("xxxxxxx") fmt.Println(string(a)) . this works!
@@ -51,30 +40,26 @@
           - cant really do this cuz i got fov now.
     . try: 1/(z-scrDist) and scrDist/(z+scrDist) in projectP3d
     . make a demo showing fov change with time
-    /. rotation is slightly borken (not accurate)
-      /. i dont understand why
     . fix camtices in world.go
     . add roll to camera.go
     /. fix line() in projection.go - /length can cause issues
-    . move the dividing by w in tri.transform() from tri.fill()
+    . move the dividing by w in transform() from tri.fill()
+      . instead of having it in multiple places, just have it in transfirm
+      . eliminates need of line3d() instead of just line()
+      . eliminates need of getCoords() in case of cube
+        . tho storing coords in a single matrix might be more efficient.
+          but cube stuff isnt that expensive or useful either
+    . figure out what the extra cot was in projection
     
 
 . plan
     /. projection matrix instead of the current methods
-    . profiling to see whats slowing down
-    . clipping the bounding boxes of triangles to the screen limit
-    . add the wait delay in parallel somehow
+    . handle the sldividing by w thing properly
     . dot product with normal defines the brightness
+    . clipping the bounding boxes of triangles to the screen limit
+    . profiling to see whats slowing down
+    . add the wait delay in parallel somehow
 
 . bugs
     . rotation not accurate
       . cube rotation along diagonal
-    /. triangle.fill() or inTriangle() is broken
-      /. triangle disappears even with the dot product test disabled
-    /. the dot product test in triangle is broken
-      /. maybe cuz of bad campos and camdir
-        /. move up/down broken
-    /. point() draw() line() and stuff broken cuz projection mat
-    /. rotation around cube seems broken
-    /. the projection of cube also seems broken
-      /. maybe cuz of the extra cot
