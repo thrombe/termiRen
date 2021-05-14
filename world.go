@@ -4,17 +4,21 @@ import (
 	// "math"
 )
 
-/*draws a projected line from 3d to 2d*/
-func line3d(p, q [][]float64, board []int) { // 3 by 1 vectors
-    if round(p[3][0]*1000) == 0 || round(q[3][0]*1000) == 0 {panic("line3d w is 0. cant divide by 0")}
-    p = matScalar(p, 1/p[3][0])
-    q = matScalar(q, 1/q[3][0])
-	line(p, q, board)
+type cuboid struct{
+    coords [][][]float64
+    camoords [][][]float64
 }
 
-type cuboid struct{
-    coords [][]float64
-    camoords [][]float64
+/*multiplies matrix with each coord*/
+func transform(mat [][]float64, vertices [][][]float64) {
+    length := len(vertices)
+    for i := 0; i < length; i++ {
+        vertices[i] = matMul(mat, vertices[i])
+        if vertices[i][3][0] != 1 { // if the forth column if vector isnt 1, then scale the vector
+            if round(vertices[i][3][0]*1000) == 0 {panic("divide by 0 in transform()")}
+            vertices[i] = matScalar(vertices[i], 1/vertices[i][3][0])//*math.Tan(fov/2))) // is the cot extra??????????????
+        }
+    }
 }
 
 /*creates vertices of cube from given centre and half diagonal vectors.
@@ -28,35 +32,27 @@ func (cu *cuboid) create(o, u [][]float64) {
         {u[2][0], -u[2][0], -u[2][0], u[2][0], u[2][0], -u[2][0], -u[2][0], u[2][0]},
         {0, 0, 0, 0, 0, 0, 0, 0},
     }
-    cu.coords = make([][]float64, 4)
-    matAppend(cu.coords, o, o, o, o, o, o, o, o)
-    cu.coords = matAdd(cu.coords, u)
+    coords := make([][]float64, 4)
+    matAppend(coords, o, o, o, o, o, o, o, o)
+    coords = matAdd(coords, u)
+    cu.coords = make([][][]float64, 8)
+    for i := 0; i < 8; i++ {
+        cu.coords[i] = getCoord3d(coords, i)
+    }
 }
 
 /*draws the cuboid on canvas using camoords*/
 func (cu *cuboid) draw(board []int) {
-    vertices := make([][][]float64, 8)
-    for i := 0; i < 8; i++ {
-        vertices[i] = getCoord3d(cu.camoords, i)
-    }
     for i := 0; i < 4; i++ { // connecting vertices by lines
-        line3d(vertices[i], vertices[(i+1)%4], board)
-        line3d(vertices[i+4], vertices[4+(i+1)%4], board)
-        line3d(vertices[i], vertices[i+4], board)
+        line(cu.camoords[i], cu.camoords[(i+1)%4], board)
+        line(cu.camoords[i+4], cu.camoords[4+(i+1)%4], board)
+        line(cu.camoords[i], cu.camoords[i+4], board)
     }
 }
 
 type triangle struct{
     vertices [][][]float64
     camtices [][][]float64 // the world matrix is multiplied with vertices and is storesd here. for methods on triangke
-}
-
-/*multiplies matrix with each coord*/
-func transform(mat [][]float64, vertices [][][]float64) {
-    length := len(vertices)
-    for i := 0; i < length; i++ {
-        vertices[i] = matMul(mat, vertices[i])
-    }
 }
 
 func (tri *triangle) create(a, b, c [][]float64) {
@@ -72,17 +68,13 @@ func (tri *triangle) normal() [][]float64 {
 func (tri *triangle) draw(board []int) {
     if vecDot(tri.vertices[0], tri.normal()) <= 0 {return} // if the front(clockwise) face of triangle faces away from/perpendicular to cam, dont draw
     for i := 0; i < 3; i++ {
-        line3d(tri.camtices[i], tri.camtices[(i+1)%3], board)
+        line(tri.camtices[i], tri.camtices[(i+1)%3], board)
     }
 }
 
 /*fills up triangle using camtices*/
 func (tri *triangle) fill(board []int,camPos *[][]float64) {
     if vecDot(matSub(tri.vertices[0], *camPos), tri.normal()) <= 0 {return} // if the front(clockwise) face of triangle faces away from/perpendicular to cam, dont draw
-    for i, vertex := range tri.camtices { // dividing each coord by that w that pops up in the 4th row cuz of projection matrix
-        z := vertex[3][0] // MOVE THIS IN tri.transform() if vertex[4] not 1
-	    tri.camtices[i] = matScalar(vertex, 1/(z))//*math.Tan(fov/2))) // is the cot extra??????????????
-    }
     minx, miny, maxx, maxy := tri.camtices[0][0][0], tri.camtices[0][1][0], tri.camtices[0][0][0], tri.camtices[0][1][0]
     // add condition for if any coord goes outside screen, then chop
     for _, vertex := range tri.camtices {

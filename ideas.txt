@@ -43,12 +43,6 @@
     . fix camtices in world.go
     . add roll to camera.go
     /. fix line() in projection.go - /length can cause issues
-    . move the dividing by w in transform() from tri.fill()
-      . instead of having it in multiple places, just have it in transfirm
-      . eliminates need of line3d() instead of just line()
-      . eliminates need of getCoords() in case of cube
-        . tho storing coords in a single matrix might be more efficient.
-          but cube stuff isnt that expensive or useful either
     . figure out what the extra cot was in projection
     
 

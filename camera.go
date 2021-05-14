@@ -19,8 +19,6 @@ func detectKey(camPos, camDir *[][]float64, win *ncurses.Window, matchan chan []
 	fwd := [][]float64 {{0}, {0}, {-tranV}, {0}}
 	camup := [][]float64 {{0}, {tranV}, {0}, {0}}
 	proj := projectionMat()
-	// camhor := [][]float64 {{tranV}, {0}, {0}, {0}}
-	// camfwd := [][]float64 {{0}, {0}, {-tranV}, {0}}
 	for {
 		kee := win.GetCh()
 		switch kee { // keep piling up rotations and translations on top(left matrix multiplication) of the previous ones. so i dont need to keet track of its current position and face direction for movement. though that would be helpful later
@@ -63,10 +61,8 @@ func detectKey(camPos, camDir *[][]float64, win *ncurses.Window, matchan chan []
 		case 'q': // quit
 			quitchan <- true
 		// default: // default not needed. so any key presses other than controls are ignored
-	}
 		// win.Println(*camPos, *camDir)/////////
+	}
 		matchan <- matMul(proj, mat)
-		// matchan <- scaleMat(4, 4)
-		// _ = proj
 	}
 }

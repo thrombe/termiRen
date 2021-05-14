@@ -22,7 +22,7 @@ var rotA = 0.1 // camera rotation angular vemocity (radians)
 
 func main() {
     if ncursed == 1 {defer ncurses.EndWin()}
-    demo5()
+    demo6()
 }
 
 func demo6() { // testing the tringle. if it is drawn when it should not be. (it faces away from camera)
@@ -43,8 +43,8 @@ func demo6() { // testing the tringle. if it is drawn when it should not be. (it
 	quitchan := make(chan bool)
 	camPos, camDir := camInit()
 	go detectKey(&camPos, &camDir, win, matchan, quitchan)
-	camMat := transMat(camPos) // default value
-	camMat = matMul(projectionMat(), camMat)
+	camMat := matMul(projectionMat(), transMat(camPos)) // default value
+	t.camtices = make([][][]float64, 3)
 
 	loop: for { // press q to quit
 		select {
@@ -53,7 +53,6 @@ func demo6() { // testing the tringle. if it is drawn when it should not be. (it
 		default:
 		}
 		transform(rot, t.vertices)
-		t.camtices = make([][][]float64, 3)
 		copy(t.camtices, t.vertices)
 
 		transform(camMat, t.camtices)
@@ -82,7 +81,8 @@ func demo5() { // rotating cube 3d with a cam
 	quitchan := make(chan bool)
 	camPos, camDir := camInit()
 	go detectKey(&camPos, &camDir, win, matchan, quitchan)
-	camMat := transMat(camPos) // default value
+	camMat := matMul(projectionMat(), transMat(camPos)) // default value
+	b.camoords = make([][][]float64, 8)
 
 	loop: for { // press q to quit
 		select {
@@ -90,8 +90,9 @@ func demo5() { // rotating cube 3d with a cam
 		case <- quitchan: break loop
 		default:
 		}
-		b.coords = matMul(rot, b.coords)
-		b.camoords = matMul(camMat, b.coords)
+		transform(rot, b.coords)
+		copy(b.camoords, b.coords)
+		transform(camMat, b.camoords)
 		b.draw(board)
 		printy()
 		time.Sleep(time.Millisecond*50)
