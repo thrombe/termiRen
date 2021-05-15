@@ -5,7 +5,7 @@
       1 rotation about a given axis
     . quarternion to 4×4 matrix conversion
     . euler angle conversion?
-4. draw circle
+4. draw circle (kinda bad way) (doing this using lines is better ig)
     . using unit vector, rotation vector, 2pi*r instead of drawing points at distance r from centre
     . or maybe draw using lines
     . or some better algorithm
@@ -15,7 +15,10 @@
       . to clip before, we can create moving player objects with fixed six planes (essentially just
         some normal vectors and some points)
       . though clipping after projection has an advantage of having simpler normals to planes
-6. managing objects
+6. world is a array of vertices
+    . every object is a array of pointer to triangles
+      . every triangle is a array of pointer to vertices
+7. managing objects
     . create an interface with draw()
       . put all objects in an array in the interface
       . loop over them to draw each
@@ -25,8 +28,8 @@
         after some time
     . to rotate everything around player, a single camera matrix is multiplied with every coord
       perhaps save it with the player
-7. gravitation simulation 3d
-8. for temporary z-buffer thing
+8. gravitation simulation 3d
+9. for temporary z-buffer thing
     . take average of the coords of triangle
     . sort triangles acc to z after projection
     . draw them in this order
@@ -43,13 +46,15 @@
     . fix camtices in world.go
     . add roll to camera.go
     /. fix line() in projection.go - /length can cause issues
-    . figure out what the extra cot was in projection
+    . figure out what the extra cot was in projection now in transform()
     
 
 . plan
     /. projection matrix instead of the current methods
-    . handle the sldividing by w thing properly
-    . dot product with normal defines the brightness
+    /. handle the dividing by w thing properly
+    . create sphere keeping in mind point 6 from above
+    . change the printing and drawing such that we can use multiple textures
+      . dot product of light dirction with normal defines the brightness of the triangle
     . clipping the bounding boxes of triangles to the screen limit
     . profiling to see whats slowing down
     . add the wait delay in parallel somehow
@@ -57,3 +62,5 @@
 . bugs
     . rotation not accurate
       . cube rotation along diagonal
+    . random characters appear randomly
+      . its most likely an issue with ncurses + ubu + termux
