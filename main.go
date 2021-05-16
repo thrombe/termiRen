@@ -19,9 +19,12 @@ var rotA = 0.1 // camera rotation angular vemocity (radians)
 
 // CONTROLS - wasd to move, ijkl to turn camera, WS to move up and down, q to QUIT
 
+var blank = ' '
+// var unblank = '.'
+
 func main() {
     if ncursed == 1 {defer ncurses.EndWin()}
-    demo5()
+    demo6()
 }
 
 func demo6() { // testing the tringle. if it is drawn when it should not be. (it faces away from camera)
@@ -56,7 +59,7 @@ func demo6() { // testing the tringle. if it is drawn when it should not be. (it
 
 		transform(camMat, t.camtices)
 		// t.draw(board)
-		t.fill(board, &camPos)
+		t.fill(&camPos, board, '#')
 		// poin := matMul(camMat, camPos)
 		// vec := matMul(camMat, camDir)
 		// vector(poin, vec, board)
@@ -92,7 +95,7 @@ func demo5() { // rotating cube 3d with a cam
 		transform(rot, b.coords)
 		copy(b.camoords, b.coords)
 		transform(camMat, b.camoords)
-		b.draw(board)
+		b.draw(board, '.')
 		printy()
 		time.Sleep(time.Millisecond*50)
 	}

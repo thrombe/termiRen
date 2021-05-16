@@ -17,7 +17,7 @@ func perint(rawboard []rune, board [][]rune) (*ncurses.Window, func()) {
             win.Refresh()
             for y := 0; y < ylim; y++ {
                 for x := 0; x < xlim; x++ {
-                    board[y][x] = ' '
+                    board[y][x] = blank
                 }
             }
         }
@@ -26,7 +26,7 @@ func perint(rawboard []rune, board [][]rune) (*ncurses.Window, func()) {
             fmt.Println(string(rawboard))
             for y := 0; y < ylim; y++ {
                 for x := 0; x < xlim; x++ {
-                    board[y][x] = ' '
+                    board[y][x] = blank
                 }
             }
         }
@@ -58,31 +58,31 @@ func giveInd(x, y float64) (int, int) {
 }
 
 /*draw point on canvas*/
-func point(h, k float64, board [][]rune) {
+func point(h, k float64, board [][]rune, texture rune) {
     x, y := giveInd(h, k*charRatio)
     if 0 <= x && x < xlim && 0 <= y && y < ylim {
-        board[y][x] = '.'
+        board[y][x] = texture
     }
 }
 
 /*draw line on canvas*/
-func line(v1, v2 [][]float64, board [][]rune) {
+func line(v1, v2 [][]float64, board [][]rune, texture rune) {
     x1, y1, x2, y2 := v1[0][0], v1[1][0], v2[0][0], v2[1][0]
     length := math.Sqrt((x2-x1)*(x2-x1) + (y2-y1)*(y2-y1))
     if round(length) == 0 { // if line is too small, just draw a point
-        point(x1, y1, board)
+        point(x1, y1, board, texture)
         return
     }
     ux, uy := (x2-x1)/length, (y2-y1)/length
     for math.Round(2*((x2-x1)*(x2-x1)+(y2-y1)*(y2-y1))) != 0 { // that 2 there is for resolution of line
-        point(x1, y1, board)
+        point(x1, y1, board, texture)
         x1, y1 = x1+ux, y1+uy
     }
 }
 
 /*draw vector with v1 as offset and v2 as direction and size*/
-func vector(v1, v2 [][]float64, board [][]rune) {
-    line(v1, matAdd(v1, v2), board)
+func vector(v1, v2 [][]float64, board [][]rune, texture rune) {
+    line(v1, matAdd(v1, v2), board, texture)
 }
 
 // /*rotate x, y about ox, oy by r radians*/

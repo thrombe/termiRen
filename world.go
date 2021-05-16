@@ -42,11 +42,11 @@ func (cu *cuboid) create(o, u [][]float64) {
 }
 
 /*draws the cuboid on canvas using camoords*/
-func (cu *cuboid) draw(board [][]rune) {
+func (cu *cuboid) draw(board [][]rune, texture rune) {
     for i := 0; i < 4; i++ { // connecting vertices by lines
-        line(cu.camoords[i], cu.camoords[(i+1)%4], board)
-        line(cu.camoords[i+4], cu.camoords[4+(i+1)%4], board)
-        line(cu.camoords[i], cu.camoords[i+4], board)
+        line(cu.camoords[i], cu.camoords[(i+1)%4], board, texture)
+        line(cu.camoords[i+4], cu.camoords[4+(i+1)%4], board, texture)
+        line(cu.camoords[i], cu.camoords[i+4], board, texture)
     }
 }
 
@@ -65,16 +65,25 @@ func (tri *triangle) normal() [][]float64 {
 }
 
 /*draws triangle using camtices*/
-func (tri *triangle) draw(board [][]rune) {
+func (tri *triangle) draw(board [][]rune, texture rune) {
     if vecDot(tri.vertices[0], tri.normal()) <= 0 {return} // if the front(clockwise) face of triangle faces away from/perpendicular to cam, dont draw
     for i := 0; i < 3; i++ {
-        line(tri.camtices[i], tri.camtices[(i+1)%3], board)
+        line(tri.camtices[i], tri.camtices[(i+1)%3], board, texture)
     }
 }
 
 /*fills up triangle using camtices*/
-func (tri *triangle) fill(board [][]rune,camPos *[][]float64) {
+func (tri *triangle) fill(camPos *[][]float64, board [][]rune, texture rune) {
     if vecDot(matSub(tri.vertices[0], *camPos), tri.normal()) <= 0 {return} // if the front(clockwise) face of triangle faces away from/perpendicular to cam, dont draw
+    
+    // lightDir := [][]float64 {{0}, {0}, {-1}, {0}} // from +z to -z
+    lightDir := matSub(tri.vertices[0], *camPos)
+    textures := ".`^,:;Il!i~+_-?][}{!)(|/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao*#MW&8%B@$"
+    tex := vecDot(vecUnit(lightDir), vecUnit(tri.normal())) // 0 to 1
+    tex = tex*float64(len(textures)-1)
+    texture = rune(textures[round(tex)])
+    
+    
     minx, miny, maxx, maxy := tri.camtices[0][0][0], tri.camtices[0][1][0], tri.camtices[0][0][0], tri.camtices[0][1][0]
     // add condition for if any coord goes outside screen, then chop
     for _, vertex := range tri.camtices {
@@ -87,7 +96,7 @@ func (tri *triangle) fill(board [][]rune,camPos *[][]float64) {
     for y := miny; y <= maxy; y++ {
         for x := minx; x <= maxx; x++ {
             pp := [][]float64 {{x}, {y}, {0}, {0}}
-            if triangle(pp) {point(x, y, board)}
+            if triangle(pp) {point(x, y, board, texture)}
         }
     }
 }
