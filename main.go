@@ -2,7 +2,6 @@ package main
 
 import (
 	"time"
-	// "fmt"
 	"math"
 	"seehuhn.de/go/ncurses"
 )
@@ -22,7 +21,7 @@ var rotA = 0.1 // camera rotation angular vemocity (radians)
 
 func main() {
     if ncursed == 1 {defer ncurses.EndWin()}
-    demo6()
+    demo5()
 }
 
 func demo6() { // testing the tringle. if it is drawn when it should not be. (it faces away from camera)
@@ -36,8 +35,8 @@ func demo6() { // testing the tringle. if it is drawn when it should not be. (it
 	rot = rotAboutPoint(rot, o)
 	t := triangle{}
 	t.create(a, b, c)
-	board := genB()
-	win, printy := perint(board)
+	rawboard, board := genB()
+	win, printy := perint(rawboard, board)
 
 	matchan := make(chan [][]float64)
 	quitchan := make(chan bool)
@@ -74,8 +73,8 @@ func demo5() { // rotating cube 3d with a cam
 	rot = rotAboutPoint(rot, o)
 	b := cuboid{}
 	b.create(o, u)
-	board := genB()
-	win, printy := perint(board)
+	rawboard, board := genB()
+	win, printy := perint(rawboard, board)
 
 	matchan := make(chan [][]float64)
 	quitchan := make(chan bool)

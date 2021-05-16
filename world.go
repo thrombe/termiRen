@@ -42,7 +42,7 @@ func (cu *cuboid) create(o, u [][]float64) {
 }
 
 /*draws the cuboid on canvas using camoords*/
-func (cu *cuboid) draw(board []int) {
+func (cu *cuboid) draw(board [][]rune) {
     for i := 0; i < 4; i++ { // connecting vertices by lines
         line(cu.camoords[i], cu.camoords[(i+1)%4], board)
         line(cu.camoords[i+4], cu.camoords[4+(i+1)%4], board)
@@ -65,7 +65,7 @@ func (tri *triangle) normal() [][]float64 {
 }
 
 /*draws triangle using camtices*/
-func (tri *triangle) draw(board []int) {
+func (tri *triangle) draw(board [][]rune) {
     if vecDot(tri.vertices[0], tri.normal()) <= 0 {return} // if the front(clockwise) face of triangle faces away from/perpendicular to cam, dont draw
     for i := 0; i < 3; i++ {
         line(tri.camtices[i], tri.camtices[(i+1)%3], board)
@@ -73,7 +73,7 @@ func (tri *triangle) draw(board []int) {
 }
 
 /*fills up triangle using camtices*/
-func (tri *triangle) fill(board []int,camPos *[][]float64) {
+func (tri *triangle) fill(board [][]rune,camPos *[][]float64) {
     if vecDot(matSub(tri.vertices[0], *camPos), tri.normal()) <= 0 {return} // if the front(clockwise) face of triangle faces away from/perpendicular to cam, dont draw
     minx, miny, maxx, maxy := tri.camtices[0][0][0], tri.camtices[0][1][0], tri.camtices[0][0][0], tri.camtices[0][1][0]
     // add condition for if any coord goes outside screen, then chop
