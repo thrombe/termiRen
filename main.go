@@ -24,7 +24,42 @@ var blank = ' '
 
 func main() {
     if ncursed == 1 {defer ncurses.EndWin()}
-    demo6()
+    demo7()
+}
+
+func demo7() { // testing the tringle. if it is drawn when it should not be. (it faces away from camera)
+	o := [][]float64 {{0}, {0}, {-30}, {1}}
+	// axis := [][]float64 {{1}, {1}, {-1}, {0}}
+	// rot := rotAboutVec(0.2, axis)
+	rot := rotMat3dy(0.0)
+	rot = rotAboutPoint(rot, o)
+	sp := sphere{}
+	sp.create(o, 5, 20)
+	rawboard, board := genB()
+	win, printy := perint(rawboard, board)
+
+	matchan := make(chan [][]float64)
+	quitchan := make(chan bool)
+	camPos, camDir := camInit()
+	go detectKey(&camPos, &camDir, win, matchan, quitchan)
+	camMat := matMul(projectionMat(), transMat(camPos)) // default value
+	// t.camtices = make([][][]float64, 3)
+
+	loop: for { // press q to quit
+		select {
+		case camMat = <- matchan:
+		case <- quitchan: break loop
+		default:
+		}
+		sp.transform(rot)
+
+		// sp.draw(&camPos, camMat, board, '.')
+		sp.fill(&camPos, camMat, board, '#')
+		// poin := matMul(camMat, camPos)
+		// vec := matMul(camMat, camDir)
+		// vector(poin, vec, board)
+		printy()
+	}
 }
 
 func demo6() { // testing the tringle. if it is drawn when it should not be. (it faces away from camera)
@@ -46,7 +81,7 @@ func demo6() { // testing the tringle. if it is drawn when it should not be. (it
 	camPos, camDir := camInit()
 	go detectKey(&camPos, &camDir, win, matchan, quitchan)
 	camMat := matMul(projectionMat(), transMat(camPos)) // default value
-	t.camtices = make([][][]float64, 3)
+	// t.camtices = make([][][]float64, 3)
 
 	loop: for { // press q to quit
 		select {
@@ -84,7 +119,7 @@ func demo5() { // rotating cube 3d with a cam
 	camPos, camDir := camInit()
 	go detectKey(&camPos, &camDir, win, matchan, quitchan)
 	camMat := matMul(projectionMat(), transMat(camPos)) // default value
-	b.camoords = make([][][]float64, 8)
+	// b.camoords = make([][][]float64, 8)
 
 	loop: for { // press q to quit
 		select {

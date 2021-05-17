@@ -9,24 +9,23 @@ func matMul(mat1, mat2 [][]float64) [][]float64 {
     if m1cols != m2rows {panic("matMul shape error")}
     result := make([][]float64, m1rows)
     for r := 0; r < m1rows; r++ {
-        row := make([]float64, m2cols)
+        result[r] = make([]float64, m2cols)
         for c := 0; c < m2cols; c++ {
             for item := 0; item < m1cols; item++ {
-                row[c] += mat1[r][item]*mat2[item][c]
+                result[r][c] += mat1[r][item]*mat2[item][c]
             }
         }
-        result[r] = row
     }
     return result
 }
 
 /*multiply any no. of matrices (in order)*/
 func nMatMul(mats...[][]float64) [][]float64 {
-    length := len(mats)
+    if len(mats) < 2 {panic("not enogh matrices in nMatMul")}
     var result [][]float64
     result = mats[0]
-    for i := 1; i < length; i++ {
-        result = matMul(result, mats[i])
+    for _, mat := range mats[1:] {
+        result = matMul(result, mat)
     }
     return result
 }
@@ -37,14 +36,41 @@ func matAdd(mat1, mat2 [][]float64) [][]float64 {
     if !(m1rows == m2rows && m1cols == m2cols) {panic("matAdd shape error")}
     result := make([][]float64, m1rows)
     for r := 0; r < m1rows; r++ {
-        row := make([]float64, m1cols)
+        result[r] = make([]float64, m1cols)
         for c := 0; c < m1cols; c++ {
-            row[c] = mat1[r][c] + mat2[r][c]
+            result[r][c] = mat1[r][c] + mat2[r][c]
         }
-        result[r] = row
     }
     return result
 }
+
+/*multiply any no. of matrices (in order)*/
+func nMatAdd(mats...[][]float64) [][]float64 {
+    if len(mats) < 2 {panic("not enogh matrices in nMatMul")}
+    var result [][]float64
+    result = mats[0]
+    for _, mat := range mats[1:] {
+        result = matAdd(result, mat)
+    }
+    return result
+}
+
+/*returns the addition of multiple similarly shaped matrices*//*
+func matAdd2(mats...[][]float64) [][]float64 {
+    if len(mats) < 2 {panic("not enogh matrices in matAdd")}
+    m1rows, m1cols := len(mats[0]), len(mats[0][0])
+    result := make([][]float64, m1rows)
+    copy(result, mats[0])
+    for _, mat := range mats[1:] {
+        if !(m1rows == len(mat) && m1cols == len(mat[0])) {panic("matAdd shape error")}
+        for r := 0; r < m1rows; r++ {
+            for c := 0; c < m1cols; c++ {
+                result[r][c] += mat[r][c]
+            }
+        }
+    }
+    return result
+}*/
 
 /*returns the subtraction of the second matrix from first*/
 func matSub(mat1, mat2 [][]float64) [][]float64 {
@@ -52,11 +78,10 @@ func matSub(mat1, mat2 [][]float64) [][]float64 {
     if !(m1rows == m2rows && m1cols == m2cols) {panic("matSub shape error")}
     result := make([][]float64, m1rows)
     for r := 0; r < m1rows; r++ {
-        row := make([]float64, m1cols)
+        result[r] = make([]float64, m1cols)
         for c := 0; c < m1cols; c++ {
-            row[c] = mat1[r][c] - mat2[r][c]
+            result[r][c] = mat1[r][c] - mat2[r][c]
         }
-        result[r] = row
     }
     return result
 }
@@ -64,12 +89,14 @@ func matSub(mat1, mat2 [][]float64) [][]float64 {
 /*multiply a scalar to a matrix*/
 func matScalar(mat [][]float64, scale float64) [][]float64 {
     mrows, mcols := len(mat), len(mat[0])
+    result := make([][]float64, mrows)
     for r := 0; r < mrows; r++ {
+        result[r] = make([]float64, mcols)
         for c := 0; c < mcols; c++ {
-            mat[r][c] = mat[r][c]*scale
+            result[r][c] = mat[r][c]*scale
         }
     }
-    return mat
+    return result
 }
 
 /*remember to input y and x index resp. */
@@ -106,11 +133,10 @@ func matTranspose(mat [][]float64) [][]float64 {
     nrows, ncols := len(mat[0]), len(mat)
     result := make([][]float64, nrows)
     for r := 0; r < nrows; r++ {
-        row := make([]float64, ncols)
+        result[r] = make([]float64, ncols)
         for c := 0; c < ncols; c++ {
-            row[c] = mat[c][r]
+            result[r][c] = mat[c][r]
         }
-        result[r] = row
     }
     return result
 }
