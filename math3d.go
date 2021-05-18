@@ -119,24 +119,3 @@ func vecCross(vec1, vec2 [][]float64) [][]float64 {
         {0},
     }
 }
-
-// helpers below
-
-/*use this to represent multiple coords in 1 matrix*/
-func matAppend(mat [][]float64, mats... [][]float64) {
-    for c := 0; c < len(mat); c++ {
-        for _, mat1 := range mats {
-            mat[c] = append(mat[c], mat1[c]...)
-        }
-    }
-}
-
-/*returns a 3d vector from the given column no.*/
-func getCoord3d(mat [][]float64, n int) [][]float64 {
-    return [][]float64 { // convert this into a n dimentional instead of jusst 3
-        {mat[0][n]},
-        {mat[1][n]},
-        {mat[2][n]},
-        {mat[3][n]},
-    }
-}

@@ -34,7 +34,7 @@ func demo7() { // testing the tringle. if it is drawn when it should not be. (it
 	rot := rotMat3dy(0.0)
 	rot = rotAboutPoint(rot, o)
 	sp := sphere{}
-	sp.create(o, 5, 20)
+	sp.create(o, 5, 40)
 	rawboard, board := genB()
 	win, printy := perint(rawboard, board)
 

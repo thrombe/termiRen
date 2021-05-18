@@ -44,33 +44,30 @@
 
 
 . remember to
-    . change board to [][]
     . change printing to something smarter
       . a := []rune("xxxxxxx") fmt.Println(string(a)) . this works!
     /. try: big scrDist and objects within that and origin(closer to screen)
           - cant really do this cuz i got fov now.
     . try: 1/(z-scrDist) and scrDist/(z+scrDist) in projectP3d
     . make a demo showing fov change with time
-    . fix camtices in world.go
     . add roll to camera.go
     /. fix line() in projection.go - /length can cause issues
     . figure out what the extra cot was in projection now in transform()
     . try adding sin and stuff to the sphere coordinates
       . that coding train vid (wierd shapes from spheres)
+    . add w1 to the new triangle rasterization (fill())
+      . it would add a matScalar but save 2 matSub and 1 matAdd
+      . basically use the barycentric coords w1, w2, w3 instead of just 2
+    . try making the rasterisation more accurate by making dw smaller when close to the limit
+    . convert the inTriangle() func to a tri.method() (only uses camtices)
+      . though the func is kinda redundant now so idk
+    . add panic quit Q to controls
     
 
 . plan
-    /. projection matrix instead of the current methods
-    /. handle the dividing by w thing properly
-    /. create sphere keeping in mind point 6 from above
-    /. change the printing and drawing such that we can use multiple textures
-      /. dot product of light dirction with normal defines the brightness of the triangle
+    . improve the shading textures by trial and error
     . clip (triangle.fill())
-      /. the triangles if outside the screen
-      . combine the triangle disappearing with the triangle shading in tri.fill()
-        instead of having 2 seperate tests
-        . if tex < 0 {return} (do this just before the texture assignment)
-      . the bounding boxes of triangles to the screen limit
+      . the parts of triangles outside the screen limit
       . clip in z
         . -0.001 to -1 (idk lower(towards 0) limit)
     . profiling to see whats slowing down
@@ -81,4 +78,4 @@
       . cube rotation along diagonal
     . random characters appear randomly
       . its most likely an issue with ncurses + ubu + termux
-    . half of the triangles in sphere arent created yet
+    /. half of the triangles in sphere arent created yet
