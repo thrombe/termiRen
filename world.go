@@ -160,12 +160,13 @@ func (tri *triangle) fill(camPos *[][]float64, board [][]rune, texture rune) {
     }
     if i == 3 {return}
     
-    lightDir := matSub(tri.vertices[0], *camPos)
-    // lightDir := [][]float64 {{0}, {0}, {-1}, {0}} // from +z to -z
+    // lightDir := matSub(tri.vertices[0], *camPos)
+    lightDir := [][]float64 {{-1}, {-1}, {-2}, {0}} // from +z to -z
     tex := vecDot(vecUnit(lightDir), vecUnit(tri.normal())) // 0 to 1
     // textures := ".`^,:;Il!i~+_-?][}{!)(|/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao*#MW&8%B@$"
     textures := "':;!vx1WnOM@B"
     tex = -tex*float64(len(textures)-1)
+    if tex < 0 {tex = 0}
     texture = rune(textures[round(tex)])
     
     v1 := tri.camtices[0]
@@ -177,6 +178,8 @@ func (tri *triangle) fill(camPos *[][]float64, board [][]rune, texture rune) {
             poin := nMatAdd(v1, matScalar(v21, w2), matScalar(v31, w3))
             point(poin[0][0], poin[1][0], board, texture)
         }
+        poin := nMatAdd(v1, matScalar(v21, w2), matScalar(v31, 1-w2)) // just to make sure there are no holes (works pretty well)
+        point(poin[0][0], poin[1][0], board, texture)
     }
 }
 

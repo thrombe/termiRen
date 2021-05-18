@@ -79,3 +79,4 @@
     . random characters appear randomly
       . its most likely an issue with ncurses + ubu + termux
     /. half of the triangles in sphere arent created yet
+    . out of place bright/dark characters appear on the bottom of sphere
