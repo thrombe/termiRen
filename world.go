@@ -75,7 +75,7 @@ func (cu *cuboid) draw(board [][]rune, texture rune) {
 
 type triangle struct{
     vertices [][][]float64
-    camtices [][][]float64 // the world matrix is multiplied with vertices and is storesd here. for methods on triangke
+    camtices [][][]float64 // the world matrix is multiplied with vertices and is stored here. for methods on triangke
 }
 
 func (tri *triangle) create(a, b, c [][]float64) {
@@ -100,7 +100,7 @@ func (tri *triangle) draw(camPos *[][]float64, board [][]rune, texture rune) {
 }
 
 /*fills up triangle using camtices*/
-func (tri *triangle) fill2(camPos *[][]float64, board [][]rune, texture rune) {
+func (tri *triangle) fill(camPos *[][]float64, board [][]rune, zbuf []float64, texture rune) {
     if vecDot(matSub(tri.vertices[0], *camPos), tri.normal()) >= 0 {return} // if the front(anticlockwise) face of triangle faces away from/perpendicular to cam, dont draw 
     // >= cuz both vectors have different origin
     
@@ -111,57 +111,7 @@ func (tri *triangle) fill2(camPos *[][]float64, board [][]rune, texture rune) {
     if i == 3 {return}
     
     lightDir := matSub(tri.vertices[0], *camPos)
-    // lightDir := [][]float64 {{0}, {0}, {-1}, {0}} // from +z to -z
-    tex := vecDot(vecUnit(lightDir), vecUnit(tri.normal())) // 0 to 1
-    textures := ".`^,:;*Il!i~+_-?][}{!)(|/tfjrxnuvczXYUJCLQ0OZmwqpdbkhaoMW&8%B@##"
-    tex = -tex*float64(len(textures)-1)
-    texture = rune(textures[round(tex)])
-    
-    minx, miny, maxx, maxy := tri.camtices[0][0][0], tri.camtices[0][1][0], tri.camtices[0][0][0], tri.camtices[0][1][0]
-    // add condition for if any coord goes outside screen, then chop
-    for _, vertex := range tri.camtices {
-        if vertex[0][0] > maxx {maxx = vertex[0][0]}
-        if vertex[0][0] < minx {minx = vertex[0][0]}
-        if vertex[1][0] > maxy {maxy = vertex[1][0]}
-        if vertex[1][0] < miny {miny = vertex[1][0]}
-    }
-    triangle := inTriangle(tri.camtices)
-    for y := miny; y <= maxy; y++ {
-        for x := minx; x <= maxx; x++ {
-            pp := [][]float64 {{x}, {y}, {0}, {0}}
-            if triangle(pp) {point(x, y, board, texture)}
-        }
-    }
-}
-
-/*returns a func that returns if a point lies in a triangle (2d)*/
-func inTriangle(vertices [][][]float64) func([][]float64) bool {
-    v1v2 := matSub(vertices[1], vertices[0])
-    v1v3 := matSub(vertices[2], vertices[0])
-    v2v3 := matSub(vertices[2], vertices[1])
-    return func(point [][]float64) bool {
-        v1p := matSub(point, vertices[0])
-        v2p := matSub(point, vertices[1])
-        ori := (vecCross(v1v2, v1p)[2][0] > 0)
-        if (vecCross(v1v3, v1p)[2][0] < 0) != ori {return false}
-        if (vecCross(v2v3, v2p)[2][0] > 0) != ori {return false}
-        return true
-    }
-}
-
-/*fills up triangle using camtices*/
-func (tri *triangle) fill(camPos *[][]float64, board [][]rune, texture rune) {
-    if vecDot(matSub(tri.vertices[0], *camPos), tri.normal()) >= 0 {return} // if the front(anticlockwise) face of triangle faces away from/perpendicular to cam, dont draw 
-    // >= cuz both vectors have different origin
-    
-    i := 0
-    for _, vert := range tri.camtices { // if traingle is outside the screen, dont draw
-        if absVal(vert[0][0]) > float64(xlim)/2 || absVal(vert[1][0])*charRatio > float64(ylim)/2 {i++}
-    }
-    if i == 3 {return}
-    
-    // lightDir := matSub(tri.vertices[0], *camPos)
-    lightDir := [][]float64 {{-1}, {-1}, {-2}, {0}} // from +z to -z
+    // lightDir := [][]float64 {{-1}, {-1}, {-2}, {0}} // from +z to -z
     tex := vecDot(vecUnit(lightDir), vecUnit(tri.normal())) // 0 to 1
     // textures := ".`^,:;Il!i~+_-?][}{!)(|/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao*#MW&8%B@$"
     textures := "':;!vx1WnOM@B"
@@ -176,10 +126,10 @@ func (tri *triangle) fill(camPos *[][]float64, board [][]rune, texture rune) {
     for w2 := 1.0; w2 >= 0; w2 -= dw2 {
         for w3 := 0.0; w3 <= 1-w2; w3 += dw3 {
             poin := nMatAdd(v1, matScalar(v21, w2), matScalar(v31, w3))
-            point(poin[0][0], poin[1][0], board, texture)
+            point3d(poin, board, zbuf, texture)
         }
         poin := nMatAdd(v1, matScalar(v21, w2), matScalar(v31, 1-w2)) // just to make sure there are no holes (works pretty well)
-        point(poin[0][0], poin[1][0], board, texture)
+        point3d(poin, board, zbuf, texture)
     }
 }
 
@@ -221,11 +171,11 @@ func (sp *sphere) draw(camPos *[][]float64, cammat [][]float64, board [][]rune, 
     }
 }
 
-func (sp *sphere) fill(camPos *[][]float64, cammat [][]float64, board [][]rune, texture rune) {
+func (sp *sphere) fill(camPos *[][]float64, cammat [][]float64, board [][]rune, zbuf []float64, texture rune) {
     for _, tri := range sp.triangles {
         copy(tri.camtices, tri.vertices)
         transform(cammat, tri.camtices)
-        tri.fill(camPos, board, texture)
+        tri.fill(camPos, board, zbuf, texture)
     }
 }
 

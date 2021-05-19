@@ -5,7 +5,8 @@ import (
     "seehuhn.de/go/ncurses"
     )
 
-func perint(rawboard []rune, board [][]rune) (*ncurses.Window, func()) {
+/*returns a generator style func that prints the board and also clears zbuf and the board*/
+func perint(rawboard []rune, board [][]rune, zbuf []float64) (*ncurses.Window, func()) {
     if ncursed == 1 {
         win := ncurses.Init()
         // xlim, ylim = win.GetMaxYX() // donno if its x, y or y, x
@@ -15,9 +16,10 @@ func perint(rawboard []rune, board [][]rune) (*ncurses.Window, func()) {
             win.Erase()
             win.AddStr(scr)
             win.Refresh()
-            for y := 0; y < ylim; y++ {
+            for y := 0; y < ylim; y++ { // clear board and zbuf
                 for x := 0; x < xlim; x++ {
                     board[y][x] = blank
+                    zbuf[y*xlim + x] = -2
                 }
             }
         }
@@ -27,6 +29,7 @@ func perint(rawboard []rune, board [][]rune) (*ncurses.Window, func()) {
             for y := 0; y < ylim; y++ {
                 for x := 0; x < xlim; x++ {
                     board[y][x] = blank
+                    zbuf[y*xlim + x] = -2
                 }
             }
         }
@@ -34,17 +37,21 @@ func perint(rawboard []rune, board [][]rune) (*ncurses.Window, func()) {
 }
 
 /*make a canvas*/
-func genB() ([]rune, [][]rune) { // might be useful to use float to be able to have brightness and stuff
+func genB() ([]rune, [][]rune, []float64) { // might be useful to use float to be able to have brightness and stuff
     rawboard := make([]rune, (xlim+1)*ylim)
     board := make([][]rune, ylim)
+    zbuf := make([]float64, xlim*ylim)
     var xini, xfin int = 0, xlim-1
     for y := 0; y < ylim; y++ {
         board[y] = rawboard[xini : xfin+1]
         rawboard[xfin+1] = '\n'
         xini += xlim-1+2
         xfin = xini+xlim-1
+        for x := 0; x < xlim; x++ {
+            zbuf[y*xlim + x] = -2
+        }
     }
-    return rawboard, board
+    return rawboard, board, zbuf
 }
 
 // //USELESS /*enter index of pixel in canvas and return coors in space*/
@@ -61,6 +68,16 @@ func giveInd(x, y float64) (int, int) {
 func point(h, k float64, board [][]rune, texture rune) {
     x, y := giveInd(h, k*charRatio)
     if 0 <= x && x < xlim && 0 <= y && y < ylim {
+        board[y][x] = texture
+    }
+}
+
+/*draws a 3d point on canvas using zbuf*/
+func point3d(p [][]float64, board [][]rune, zbuf []float64, texture rune) {
+    x, y := giveInd(p[0][0], p[1][0]*charRatio)
+    if !(0 <= x && x < xlim && 0 <= y && y < ylim) {return}
+    if zbuf[y*xlim + x] < p[2][0] {
+        zbuf[y*xlim + x] = p[2][0]
         board[y][x] = texture
     }
 }

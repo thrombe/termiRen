@@ -58,14 +58,14 @@
     . add w1 to the new triangle rasterization (fill())
       . it would add a matScalar but save 2 matSub and 1 matAdd
       . basically use the barycentric coords w1, w2, w3 instead of just 2
-    . try making the rasterisation more accurate by making dw smaller when close to the limit
-    . convert the inTriangle() func to a tri.method() (only uses camtices)
-      . though the func is kinda redundant now so idk
+    /. try making the rasterisation more accurate by making dw smaller when close to the limit
+    /. convert the inTriangle() func to a tri.method() (only uses camtices)
+      /. though the func is kinda redundant now so idk
     . add panic quit Q to controls
     
 
 . plan
-    . improve the shading textures by trial and error
+    /. improve the shading textures by trial and error
     . clip (triangle.fill())
       . the parts of triangles outside the screen limit
       . clip in z
@@ -78,5 +78,7 @@
       . cube rotation along diagonal
     . random characters appear randomly
       . its most likely an issue with ncurses + ubu + termux
+      /. i think that happens when i print stuff too quickly (dosent hapen when rendring takes time or when delay is introduced)
     /. half of the triangles in sphere arent created yet
     . out of place bright/dark characters appear on the bottom of sphere
+      . sphere creation error. half the triangles at the top and bottom are just too thin

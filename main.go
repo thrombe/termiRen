@@ -27,23 +27,22 @@ func main() {
     demo7()
 }
 
-func demo7() { // testing the tringle. if it is drawn when it should not be. (it faces away from camera)
+func demo7() { // sphere with n*n triangles
 	o := [][]float64 {{0}, {0}, {-30}, {1}}
 	// axis := [][]float64 {{1}, {1}, {-1}, {0}}
 	// rot := rotAboutVec(0.2, axis)
 	rot := rotMat3dy(0.0)
 	rot = rotAboutPoint(rot, o)
 	sp := sphere{}
-	sp.create(o, 5, 40)
-	rawboard, board := genB()
-	win, printy := perint(rawboard, board)
+	sp.create(o, 5, 20)
+	rawboard, board, zbuf := genB()
+	win, printy:= perint(rawboard, board, zbuf)
 
 	matchan := make(chan [][]float64)
 	quitchan := make(chan bool)
 	camPos, camDir := camInit()
 	go detectKey(&camPos, &camDir, win, matchan, quitchan)
 	camMat := matMul(projectionMat(), transMat(camPos)) // default value
-	// t.camtices = make([][][]float64, 3)
 
 	loop: for { // press q to quit
 		select {
@@ -54,10 +53,8 @@ func demo7() { // testing the tringle. if it is drawn when it should not be. (it
 		sp.transform(rot)
 
 		// sp.draw(&camPos, camMat, board, '.')
-		sp.fill(&camPos, camMat, board, '#')
-		// poin := matMul(camMat, camPos)
-		// vec := matMul(camMat, camDir)
-		// vector(poin, vec, board)
+		// time.Sleep(time.Millisecond*50)
+		sp.fill(&camPos, camMat, board, zbuf, '#')
 		printy()
 	}
 }
@@ -73,15 +70,14 @@ func demo6() { // testing the tringle. if it is drawn when it should not be. (it
 	rot = rotAboutPoint(rot, o)
 	t := triangle{}
 	t.create(a, b, c)
-	rawboard, board := genB()
-	win, printy := perint(rawboard, board)
+	rawboard, board, zbuf := genB()
+	win, printy := perint(rawboard, board, zbuf)
 
 	matchan := make(chan [][]float64)
 	quitchan := make(chan bool)
 	camPos, camDir := camInit()
 	go detectKey(&camPos, &camDir, win, matchan, quitchan)
 	camMat := matMul(projectionMat(), transMat(camPos)) // default value
-	// t.camtices = make([][][]float64, 3)
 
 	loop: for { // press q to quit
 		select {
@@ -94,7 +90,7 @@ func demo6() { // testing the tringle. if it is drawn when it should not be. (it
 
 		transform(camMat, t.camtices)
 		// t.draw(board)
-		t.fill(&camPos, board, '#')
+		t.fill(&camPos, board, zbuf, '#')
 		// poin := matMul(camMat, camPos)
 		// vec := matMul(camMat, camDir)
 		// vector(poin, vec, board)
@@ -111,15 +107,14 @@ func demo5() { // rotating cube 3d with a cam
 	rot = rotAboutPoint(rot, o)
 	b := cuboid{}
 	b.create(o, u)
-	rawboard, board := genB()
-	win, printy := perint(rawboard, board)
+	rawboard, board, zbuf := genB()
+	win, printy := perint(rawboard, board, zbuf)
 
 	matchan := make(chan [][]float64)
 	quitchan := make(chan bool)
 	camPos, camDir := camInit()
 	go detectKey(&camPos, &camDir, win, matchan, quitchan)
 	camMat := matMul(projectionMat(), transMat(camPos)) // default value
-	// b.camoords = make([][][]float64, 8)
 
 	loop: for { // press q to quit
 		select {

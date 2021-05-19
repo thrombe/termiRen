@@ -186,3 +186,18 @@ func round(i float64) int {
     //llim := int(i)
     //if i-float64(llim) >= 0.5 {return llim+1} else {return llim}
 }
+
+/*returns a func that returns if a point lies in a triangle (2d)*//*
+func inTriangle(vertices [][][]float64) func([][]float64) bool {
+    v1v2 := matSub(vertices[1], vertices[0])
+    v1v3 := matSub(vertices[2], vertices[0])
+    v2v3 := matSub(vertices[2], vertices[1])
+    return func(point [][]float64) bool {
+        v1p := matSub(point, vertices[0])
+        v2p := matSub(point, vertices[1])
+        ori := (vecCross(v1v2, v1p)[2][0] > 0)
+        if (vecCross(v1v3, v1p)[2][0] < 0) != ori {return false}
+        if (vecCross(v2v3, v2p)[2][0] > 0) != ori {return false}
+        return true
+    }
+}*/
