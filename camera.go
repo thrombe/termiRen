@@ -2,6 +2,7 @@ package main
 
 import (
 	"seehuhn.de/go/ncurses"
+	// "fmt"
 )
 
 /*creates a default position and direction for the camera*/
@@ -13,7 +14,7 @@ func camInit() ([][]float64, [][]float64) {
 
 /*detects keys and sends curresponding matrix to the channel*/
 func detectKey(camPos, camDir *[][]float64, win *ncurses.Window, matchan chan [][]float64, quitchan chan bool) {
-	mat := transMat(*camPos) // camPos and camDir arent really needed for this. but will have to keep track of them here to find camera's in 3d position
+	mat := transMat(*camPos)
 	up := [][]float64 {{0}, {tranV}, {0}, {0}}
 	hor := [][]float64 {{tranV}, {0}, {0}, {0}}
 	fwd := [][]float64 {{0}, {0}, {-tranV}, {0}}
@@ -62,7 +63,8 @@ func detectKey(camPos, camDir *[][]float64, win *ncurses.Window, matchan chan []
 			quitchan <- true
 		// default: // default not needed. so any key presses other than controls are ignored
 		// win.Println(*camPos, *camDir)/////////
-	}
+		}
+		// fmt.Println(*camPos)
 		matchan <- matMul(proj, mat)
 	}
 }

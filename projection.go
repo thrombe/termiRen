@@ -19,7 +19,7 @@ func perint(rawboard []rune, board [][]rune, zbuf []float64) (*ncurses.Window, f
             for y := 0; y < ylim; y++ { // clear board and zbuf
                 for x := 0; x < xlim; x++ {
                     board[y][x] = blank
-                    zbuf[y*xlim + x] = -2
+                    zbuf[y*xlim + x] = -2 // -1 should be the clip limit (1000 i think, as defined in projection matrix)
                 }
             }
         }
@@ -37,7 +37,7 @@ func perint(rawboard []rune, board [][]rune, zbuf []float64) (*ncurses.Window, f
 }
 
 /*make a canvas*/
-func genB() ([]rune, [][]rune, []float64) { // might be useful to use float to be able to have brightness and stuff
+func genB() ([]rune, [][]rune, []float64) {
     rawboard := make([]rune, (xlim+1)*ylim)
     board := make([][]rune, ylim)
     zbuf := make([]float64, xlim*ylim)

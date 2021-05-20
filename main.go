@@ -24,7 +24,43 @@ var blank = ' '
 
 func main() {
     if ncursed == 1 {defer ncurses.EndWin()}
-    demo7()
+    demo8()
+}
+
+func demo8() { // load obj files
+	o := [][]float64 {{0}, {0}, {-10}, {1}}
+	// axis := [][]float64 {{1}, {1}, {-1}, {0}}
+	// rot := rotAboutVec(0.2, axis)
+	rot := rotMat3dy(0.0)
+	rot = rotAboutPoint(rot, o)
+	obj := object{}
+	obj.create("./objects/teapot.obj", o)
+	rawboard, board, zbuf := genB()
+	win, printy:= perint(rawboard, board, zbuf)
+
+	big := scaleMat(5, 4) // scale object size
+	// big = rotAboutPoint(big, o)
+	obj.transform(big)
+
+	matchan := make(chan [][]float64)
+	quitchan := make(chan bool)
+	camPos, camDir := camInit()
+	go detectKey(&camPos, &camDir, win, matchan, quitchan)
+	camMat := matMul(projectionMat(), transMat(camPos)) // default value
+
+	loop: for { // press q to quit
+		select {
+		case camMat = <- matchan:
+		case <- quitchan: break loop
+		default:
+		}
+		obj.transform(rot)
+
+		// sp.draw(&camPos, camMat, board, '.')
+		// time.Sleep(time.Millisecond*50)
+		obj.fill(&camPos, camMat, board, zbuf, '#')
+		printy()
+	}
 }
 
 func demo7() { // sphere with n*n triangles

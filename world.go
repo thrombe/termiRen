@@ -2,7 +2,13 @@ package main
 
 import (
 	"math"
+    "strings"
+    "strconv"
+    "bufio"
+    "os"
+    // "fmt"
 )
+
 // helper functions
 
 /*use this to represent multiple coords in 1 matrix*/
@@ -182,6 +188,91 @@ func (sp *sphere) fill(camPos *[][]float64, cammat [][]float64, board [][]rune, 
 /*multiplies the mat with coords of each triangle*/
 func (sp *sphere) transform(mat [][]float64) {
     for _, tri := range sp.triangles {
+        transform(mat, tri.vertices)
+    }
+}
+
+type object struct {
+    triangles []triangle
+}
+
+func (ob *object) create(path string, o [][]float64) {
+    file, err := os.Open(path)
+	defer file.Close()
+	if err != nil {panic(err)}
+
+	sc := bufio.NewScanner(file) // parsing file
+	var vertices [][][]float64
+	var faces [][]float64
+	for sc.Scan() {
+		text := sc.Text()
+        if len(text) == 0 {continue}
+		switch text[0] {
+		case 'v':
+			texx := strings.Split(text[2:], " ")
+			vertex := make([][]float64, 4)
+			for i := 0; i < 3; i++ {
+				num, err := strconv.ParseFloat(texx[i], 64)
+				if err != nil {panic(err)}
+				vertex[i] = []float64 {num}
+			}
+			vertex[3] = []float64 {1}
+            vertex = matAdd(vertex, o)
+			vertex[3] = []float64 {1} // if 0 has a 1 in 4th col, it could cause probs
+			vertices = append(vertices, vertex)
+		case 'f':
+			texx := strings.Split(text[2:], " ")
+			face := make([]float64, 3)
+			for i := 0; i < 3; i++ {
+				face[i], err = strconv.ParseFloat(texx[i], 64)
+				if err != nil {panic(err)}
+				face[i]--
+			}
+			// face[0], face[2] = face[2], face[0] // clockwise to anticlockwise
+			faces = append(faces, face)
+		}
+ 	}
+    
+    // // finding the centre of a object
+    // i := 0
+    // cen := [][]float64 {{0}, {0}, {0}, {0}}
+    // for _, vertex := range vertices {
+    //     i++
+    //     cen = matAdd(cen, vertex)
+    // }
+    // cen = matScalar(cen, 1/float64(i))
+    // fmt.Println(cen)
+    // //
+ 	
+ 	for _, face := range faces { // creating triangles
+ 	    a := vertices[int(face[0])]
+ 	    b := vertices[int(face[1])]
+ 	    c := vertices[int(face[2])]
+ 	    tri := triangle{}
+ 	    tri.create(a, b, c)
+ 	    ob.triangles = append(ob.triangles, tri)
+ 	}
+}
+
+func (ob *object) draw(camPos *[][]float64, cammat [][]float64, board [][]rune, texture rune) {
+    for _, tri := range ob.triangles {
+        copy(tri.camtices, tri.vertices)
+        transform(cammat, tri.camtices)
+        tri.draw(camPos, board, texture)
+    }
+}
+
+func (ob *object) fill(camPos *[][]float64, cammat [][]float64, board [][]rune, zbuf []float64, texture rune) {
+    for _, tri := range ob.triangles {
+        copy(tri.camtices, tri.vertices)
+        transform(cammat, tri.camtices)
+        tri.fill(camPos, board, zbuf, texture)
+    }
+}
+
+/*multiplies the mat with coords of each triangle*/
+func (ob *object) transform(mat [][]float64) {
+    for _, tri := range ob.triangles {
         transform(mat, tri.vertices)
     }
 }
