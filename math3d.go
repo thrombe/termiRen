@@ -92,10 +92,11 @@ func rotAboutPoint(rot ,o [][]float64) [][]float64 {
 func rotAboutVec(angle float64, axis [][]float64) [][]float64 {
     // y and z are angles around y and z axes.
     // transforming the axis into x-axis
-    y := math.Atan2(axis[2][0], axis[0][0]) // tan^-1(z/x)
-    z := math.Atan2(axis[1][0], axis[0][0]) // tan^-1(y/x)
-    rot := rotMat3dx(angle)
+    y := math.Atan2(axis[2][0], axis[0][0]) // tan^-1(z/x) // turn around y
     ry := rotMat3dy(y)
+    axis = matMul(ry, axis) // turn the axis around y
+    z := math.Atan2(axis[1][0], axis[0][0]) // tan^-1(y/x) // turn around z but according to the new axis
+    rot := rotMat3dx(angle)
     ryinv := rotMat3dy(-y)
     rz := rotMat3dz(-z)
     rzinv := rotMat3dz(z)

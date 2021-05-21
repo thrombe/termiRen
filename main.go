@@ -56,7 +56,7 @@ func demo8() { // load obj files
 		}
 		obj.transform(rot)
 
-		// sp.draw(&camPos, camMat, board, '.')
+		// obj.draw(&camPos, camMat, board, '.')
 		// time.Sleep(time.Millisecond*50)
 		obj.fill(&camPos, camMat, board, zbuf, '#')
 		printy()
@@ -70,7 +70,7 @@ func demo7() { // sphere with n*n triangles
 	rot := rotMat3dy(0.0)
 	rot = rotAboutPoint(rot, o)
 	sp := sphere{}
-	sp.create(o, 5, 20)
+	sp.create(o, 5, 200) // performance goal(for now)(without multicore) - should be smooth for 200 at just the draw
 	rawboard, board, zbuf := genB()
 	win, printy:= perint(rawboard, board, zbuf)
 
@@ -88,9 +88,9 @@ func demo7() { // sphere with n*n triangles
 		}
 		sp.transform(rot)
 
-		// sp.draw(&camPos, camMat, board, '.')
+		sp.draw(&camPos, camMat, board, '.')
 		// time.Sleep(time.Millisecond*50)
-		sp.fill(&camPos, camMat, board, zbuf, '#')
+		// sp.fill(&camPos, camMat, board, zbuf, '#')
 		printy()
 	}
 }
@@ -135,11 +135,11 @@ func demo6() { // testing the tringle. if it is drawn when it should not be. (it
 }
 
 func demo5() { // rotating cube 3d with a cam
-	o := [][]float64 {{5}, {5}, {-30}, {1}} // 1 for 4 by 1 matrix
+	o := [][]float64 {{0}, {5}, {-30}, {1}} // 1 for 4 by 1 matrix
 	u := [][]float64 {{5}, {5}, {5}, {0}} // 0 dosent matter here
-	// axis := [][]float64 {{1}, {1}, {-1}, {0}}
-	// rot := rotAboutVec(0.2, axis)
-	rot := rotMat3dy(0.0)
+	axis := [][]float64 {{1}, {1}, {-1}, {0}}
+	rot := rotAboutVec(0.2, axis)
+	// rot := rotMat3dy(0.0)
 	rot = rotAboutPoint(rot, o)
 	b := cuboid{}
 	b.create(o, u)

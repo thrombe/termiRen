@@ -10,25 +10,19 @@
     . or maybe draw using lines
     . or some better algorithm
     . create the siney circle (circle around y, with y += sin(angle) angle is variable)
-5. clipping
-    . either clip before the rotation cum projection matrix, or clip in the projected space
-      . to clip before, we can create moving player objects with fixed six planes (essentially just
-        some normal vectors and some points)
-      . though clipping after projection has an advantage of having simpler normals to planes
-6. world is a array of vertices
-    . every object is a array of pointer to triangles
-      . every triangle is a array of pointer to vertices
+/6. world is a array of vertices
+    /. every object is a array of pointer to triangles
+      /. every triangle is a array of pointer to vertices
 7. managing objects
     . create an interface with draw()
       . put all objects in an array in the interface
       . loop over them to draw each
-    . manage another rotation matrix connected to each objest that defines its rotation per frame
-      . if objects rotates continuously, the matrix is not identity matrix
-      . if matrix stops rotation after some time, it the matrix changes into identity matrix after 
+    /. manage another rotation matrix connected to each objest that defines its rotation per frame
+      /. if objects rotates continuously, the matrix is not identity matrix
+      /. if matrix stops rotation after some time, it the matrix changes into identity matrix after 
         after some time
-    . to rotate everything around player, a single camera matrix is multiplied with every coord
+    /. to rotate everything around player, a single camera matrix is multiplied with every coord
       perhaps save it with the player
-8. gravitation simulation 3d
 /10. depth buffer
     /. create a [][]float of the suze of no. of pixels with some default value (-inf)
     /. while going through all pixels of a triangle,
@@ -37,58 +31,69 @@
 11. draw torus
     . spin circle around a axis and store the vertices
     . connect vertices into triangles
+12. while rendering, when cam moves, campos is directly changed while being used but try.fill()
+    it shows effectquicker than the movement of camera. maybe try just modifying camMat 
+    directly and not use channel. as we dont care about race condition there
+13. 
 
 
 . remember to
+    . WRITE COMMENTS FOR CODE BEFORE ABANDONING/PAUSING PROJECT
     /. change printing to something smarter
       /. a := []rune("xxxxxxx") fmt.Println(string(a)) . this works!
-    /. try: big scrDist and objects within that and origin(closer to screen)
-          - cant really do this cuz i got fov now.
     . try: 1/(z-scrDist) and scrDist/(z+scrDist) in projectP3d
     . make a demo showing fov change with time
     . add roll to camera.go
-    /. fix line() in projection.go - /length can cause issues
     . figure out what the extra cot was in projection now in transform()
     . try adding sin and stuff to the sphere coordinates
       . that coding train vid (wierd shapes from spheres)
     . add w1 to the new triangle rasterization (fill())
       . it would add a matScalar but save 2 matSub and 1 matAdd
       . basically use the barycentric coords w1, w2, w3 instead of just 2
-    /. try making the rasterisation more accurate by making dw smaller when close to the limit
-    /. convert the inTriangle() func to a tri.method() (only uses camtices)
-      /. though the func is kinda redundant now so idk
     . add panic quit Q to controls
-    . convert zbuf to the single array multi-slice thing (like board)
     
 
 . plan
-    /. improve the shading textures by trial and error
-    /. implement .obj importing
-    . create matrix()
-      . do this in mathStuff
-      . returns [][]float but its just 1 []float with more slices of that array (like the board)
-      . takes in rows, cols, ...float64
-      . this prevents from making 5 slices per 4 row matix
-    . store all vertices in a single array to prevent copies.
-      . either the whole world or per object. each has its benefits.
-      . change to pointers wherever vertices are required
+    /. fix campos and camdir stuff
+    . profiling to see whats slowing down
+    . optimise (just the mesh part and not the fill)
+      . POINT 12 from above
+        . this could make a huge difference (maybe)
+          . or it may just improve speed by 1 frame
+        . but will also cause glitch effects
+        . save camMat with camera
+      . create matrix()
+         . do this in mathStuff
+         . returns [][]float but its just 1 []float with more slices of that array (like the board)
+         . takes in rows, cols, ...float64
+         . this prevents from making 5 slices per 4 row matix
+      . store all vertices in a single array to prevent copies.
+        . point 7 from above
+        . either the whole world or per object. each has its benefits.
+          . for the world option, remove the transform from tri.fill() and stuff
+        . change to pointers wherever vertices are required
+        . transform should directly change the vertices (maybe)
+        . convert zbuf to the single array multi-slice thing (like board)
+    . new rasterisation method (similar to 1st (attempt 3)) (phone camera gallery)
+      . change line() too
     . clip (triangle.fill())
       . the parts of triangles outside the screen limit
       . clip in z
         . -0.001 to -1 (idk lower(towards 0) limit)
-    . profiling to see whats slowing down
     . add the wait delay in parallel somehow
 
 . bugs
-    . rotation not accurate
-      . cube rotation along diagonal
+    /. BOTH THE LOWER BUGS WERE CONNECTED TO rotAboutVec !!!!!!!!
+    /. rotation not accurate
+      /. cube rotation along diagonal
+    /. lighting gets wierd cuz the campos and camera move away
+      /. reproduce - teapot, look down, move up, rotate around object
     . random characters appear randomly
       . its most likely an issue with ncurses + ubu + termux
     . out of place bright/dark characters appear on the bottom of sphere
       . sphere creation error. half the triangles at the top and bottom are just too thin
-    . lighting gets wierd cuz the campos and camera move away
-      . reproduce - teapot, look down, move up, rotate around object
     . rotating loaded objects about their centres dosent go well
       . happens cuz i cant find the centre of object
+      . and thus scaling them goes bad too
     . many out of place dark spots in teapot
       . idk why 

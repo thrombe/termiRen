@@ -1,8 +1,8 @@
 package main
 
 import (
-	"seehuhn.de/go/ncurses"
 	// "fmt"
+	"seehuhn.de/go/ncurses"
 )
 
 /*creates a default position and direction for the camera*/
@@ -19,6 +19,7 @@ func detectKey(camPos, camDir *[][]float64, win *ncurses.Window, matchan chan []
 	hor := [][]float64 {{tranV}, {0}, {0}, {0}}
 	fwd := [][]float64 {{0}, {0}, {-tranV}, {0}}
 	camup := [][]float64 {{0}, {tranV}, {0}, {0}}
+	camhor := [][]float64 {{tranV}, {0}, {0}, {0}}
 	proj := projectionMat()
 	for {
 		kee := win.GetCh()
@@ -31,11 +32,9 @@ func detectKey(camPos, camDir *[][]float64, win *ncurses.Window, matchan chan []
 			*camPos = matMul(transMatInv(*camDir), *camPos)
 		case 'a': // move left
 			mat = matMul(transMat(hor), mat)
-			camhor := matScalar(vecCross(*camDir, camup), 1/tranV) // hor == cross of fwd and up
 			*camPos = matMul(transMatInv(camhor), *camPos)
 		case 'd': // move right
 			mat = matMul(transMatInv(hor), mat)
-			camhor := matScalar(vecCross(*camDir, camup), 1/tranV)
 			*camPos = matMul(transMat(camhor), *camPos)
 		case 'W': // move up
 			mat = matMul(transMatInv(up), mat)
@@ -45,26 +44,26 @@ func detectKey(camPos, camDir *[][]float64, win *ncurses.Window, matchan chan []
 			*camPos = matMul(transMatInv(camup), *camPos)
 		case 'j': // look left
 			mat = matMul(rotAboutVec(-rotA, up), mat)
-			*camDir = matMul(rotAboutPoint(rotAboutVec(rotA, camup), *camPos), *camDir)
+			*camDir = matMul(rotAboutVec(rotA, camup), *camDir)
+			camhor = matMul(rotAboutVec(rotA, camup), camhor)
 		case 'l': // look right
 			mat = matMul(rotAboutVec(rotA, up), mat)
-			*camDir = matMul(rotAboutPoint(rotAboutVec(-rotA, camup), *camPos), *camDir)
+			*camDir = matMul(rotAboutVec(-rotA, camup), *camDir)
+			camhor = matMul(rotAboutVec(-rotA, camup), camhor)
 		case 'i': // look up
 			mat = matMul(rotAboutVec(-rotA, hor), mat)
-			camhor := matScalar(vecCross(*camDir, camup), 1/tranV)
-			*camDir = matMul(rotAboutPoint(rotAboutVec(rotA, camhor), *camPos), *camDir)
-			camup = matMul(rotAboutPoint(rotAboutVec(rotA, camhor), *camPos), camup)
+			*camDir = matMul(rotAboutVec(rotA, camhor), *camDir)
+			camup = matMul(rotAboutVec(rotA, camhor), camup)
 		case 'k': // look down
 			mat = matMul(rotAboutVec(rotA, hor), mat)
-			camhor := matScalar(vecCross(*camDir, camup), 1/tranV)
-			*camDir = matMul(rotAboutPoint(rotAboutVec(-rotA, camhor), *camPos), *camDir)
-			camup = matMul(rotAboutPoint(rotAboutVec(-rotA, camhor), *camPos), camup)
+			*camDir = matMul(rotAboutVec(-rotA, camhor), *camDir)
+			camup = matMul(rotAboutVec(-rotA, camhor), camup)
 		case 'q': // quit
 			quitchan <- true
-		// default: // default not needed. so any key presses other than controls are ignored
-		// win.Println(*camPos, *camDir)/////////
+			// default: // default not needed. so any key presses other than controls are ignored
+			// win.Println(*camPos, *camDir)/////////
 		}
-		// fmt.Println(*camPos)
+		// fmt.Println(camup, camhor)
 		matchan <- matMul(proj, mat)
 	}
 }
