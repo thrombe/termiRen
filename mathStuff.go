@@ -3,13 +3,29 @@ import (
     "math"
 )
 
+/*returns a matrix with entered values or empty matrix if no values entered*/
+func matrix(rows, cols int, vals ...float64) [][]float64 {
+    if len(vals) != rows*cols {
+        if len(vals) == 0 {vals = make([]float64, rows*cols)} else {panic("matrix() not enough values")}
+    }
+    mat := make([][]float64, rows)
+    for r := 0; r < rows; r++ {
+        mat[r] = vals[r*cols : (r+1)*cols]
+    }
+    return mat
+}
+
+/*returns a len(values), 1 matrix*/
+func vector(vals ...float64) [][]float64 {
+    return matrix(len(vals), 1, vals...)
+}
+
 /*multiply matrices of arbitary sizes(legal only ofc)*/
 func matMul(mat1, mat2 [][]float64) [][]float64 {
     m1rows, m1cols, m2rows, m2cols := len(mat1), len(mat1[0]), len(mat2), len(mat2[0])
     if m1cols != m2rows {panic("matMul shape error")}
-    result := make([][]float64, m1rows)
+    result := matrix(m1rows, m2cols)
     for r := 0; r < m1rows; r++ {
-        result[r] = make([]float64, m2cols)
         for c := 0; c < m2cols; c++ {
             for item := 0; item < m1cols; item++ {
                 result[r][c] += mat1[r][item]*mat2[item][c]
@@ -34,9 +50,8 @@ func nMatMul(mats...[][]float64) [][]float64 {
 func matAdd(mat1, mat2 [][]float64) [][]float64 {
     m1rows, m1cols, m2rows, m2cols := len(mat1), len(mat1[0]), len(mat2), len(mat2[0])
     if !(m1rows == m2rows && m1cols == m2cols) {panic("matAdd shape error")}
-    result := make([][]float64, m1rows)
+    result := matrix(m1rows, m1cols)
     for r := 0; r < m1rows; r++ {
-        result[r] = make([]float64, m1cols)
         for c := 0; c < m1cols; c++ {
             result[r][c] = mat1[r][c] + mat2[r][c]
         }
@@ -76,9 +91,8 @@ func matAdd2(mats...[][]float64) [][]float64 {
 func matSub(mat1, mat2 [][]float64) [][]float64 {
     m1rows, m1cols, m2rows, m2cols := len(mat1), len(mat1[0]), len(mat2), len(mat2[0])
     if !(m1rows == m2rows && m1cols == m2cols) {panic("matSub shape error")}
-    result := make([][]float64, m1rows)
+    result := matrix(m1rows, m1cols)
     for r := 0; r < m1rows; r++ {
-        result[r] = make([]float64, m1cols)
         for c := 0; c < m1cols; c++ {
             result[r][c] = mat1[r][c] - mat2[r][c]
         }
@@ -89,9 +103,8 @@ func matSub(mat1, mat2 [][]float64) [][]float64 {
 /*multiply a scalar to a matrix*/
 func matScalar(mat [][]float64, scale float64) [][]float64 {
     mrows, mcols := len(mat), len(mat[0])
-    result := make([][]float64, mrows)
+    result := matrix(mrows, mcols)
     for r := 0; r < mrows; r++ {
-        result[r] = make([]float64, mcols)
         for c := 0; c < mcols; c++ {
             result[r][c] = mat[r][c]*scale
         }
@@ -102,15 +115,16 @@ func matScalar(mat [][]float64, scale float64) [][]float64 {
 /*remember to input y and x index resp. */
 func subMat(mat [][]float64, y, x int) [][]float64 {
     mrows := len(mat)
-    var submat [][]float64
+    submat := matrix(mrows-1, mrows-1)
+    h, k := 0, 0
     for r := 0; r < mrows; r++ {
         if r == y {continue}
-        var row []float64
+        k++
         for c := 0; c < mrows; c++ {
             if c == x {continue}
-            row = append(row, mat[r][c])
+            h++
+            submat[k][h] = mat[r][c]
         }
-        submat = append(submat, row)
     }
     return submat
     //return matScalar(submat, math.Pow(-1, float64(x+y)))
@@ -130,11 +144,10 @@ func matDet(mat [][]float64) float64 {
 
 /*returns transpose of a matrix*/
 func matTranspose(mat [][]float64) [][]float64 {
-    nrows, ncols := len(mat[0]), len(mat)
-    result := make([][]float64, nrows)
-    for r := 0; r < nrows; r++ {
-        result[r] = make([]float64, ncols)
-        for c := 0; c < ncols; c++ {
+    mrows, mcols := len(mat), len(mat[0])
+    result := matrix(mcols, mrows)
+    for r := 0; r < mrows; r++ {
+        for c := 0; c < mcols; c++ {
             result[r][c] = mat[c][r]
         }
     }
@@ -156,9 +169,10 @@ func vecSize(vec [][]float64) float64 {
 func vecUnit(vec [][]float64) [][]float64 {
     size := vecSize(vec)
     rows := len(vec)
-    result := make([][]float64, rows)
+    // result := make([][]float64, rows)
+    result := matrix(rows, 1)
     for r := 0; r < rows; r++ {
-        result[r] = []float64 {vec[r][0]/size}
+        result[r][0] = vec[r][0]/size
     }
     return result
 }

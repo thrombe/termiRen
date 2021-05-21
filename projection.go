@@ -98,7 +98,7 @@ func line(v1, v2 [][]float64, board [][]rune, texture rune) {
 }
 
 /*draw vector with v1 as offset and v2 as direction and size*/
-func vector(v1, v2 [][]float64, board [][]rune, texture rune) {
+func drawVec(v1, v2 [][]float64, board [][]rune, texture rune) {
     line(v1, matAdd(v1, v2), board, texture)
 }
 
