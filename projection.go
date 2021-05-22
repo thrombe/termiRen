@@ -5,7 +5,7 @@ import (
     "seehuhn.de/go/ncurses"
     )
 
-/*returns a generator style func that prints the board and also clears zbuf and the board*/
+//returns a generator style func that prints the board and also clears zbuf and the board
 func perint(rawboard []rune, board [][]rune, zbuf [][]float64) (*ncurses.Window, func()) {
     if ncursed == 1 {
         win := ncurses.Init()
@@ -36,7 +36,7 @@ func perint(rawboard []rune, board [][]rune, zbuf [][]float64) (*ncurses.Window,
     }
 }
 
-/*make a canvas*/
+//make a canvas
 func genB() ([]rune, [][]rune, [][]float64) {
     rawboard := make([]rune, (xlim+1)*ylim)
     board := make([][]rune, ylim)
@@ -61,12 +61,12 @@ func genB() ([]rune, [][]rune, [][]float64) {
 //     return float64(x-int(xlim/2)), float64(-y+int(ylim/2)) 
 // }
 
-/*enter coords of points and return index in canvas*/
+//enter coords of points and return index in canvas
 func giveInd(x, y float64) (int, int) {
     return round(x)+int(xlim/2), -round(y)+int(ylim/2)
 }
 
-/*draw point on canvas*/
+//draw point on canvas
 func point(h, k float64, board [][]rune, texture rune) {
     x, y := giveInd(h, k*charRatio)
     if 0 <= x && x < xlim && 0 <= y && y < ylim {
@@ -74,7 +74,7 @@ func point(h, k float64, board [][]rune, texture rune) {
     }
 }
 
-/*draws a 3d point on canvas using zbuf*/
+//draws a 3d point on canvas using zbuf
 func point3d(p [][]float64, board [][]rune, zbuf [][]float64, texture rune) {
     x, y := giveInd(p[0][0], p[1][0]*charRatio)
     if !(0 <= x && x < xlim && 0 <= y && y < ylim) {return}
@@ -84,7 +84,7 @@ func point3d(p [][]float64, board [][]rune, zbuf [][]float64, texture rune) {
     }
 }
 
-/*draw line on canvas*/
+//draw line on canvas
 func line(v1, v2 [][]float64, board [][]rune, texture rune) {
     x1, y1, x2, y2 := v1[0][0], v1[1][0], v2[0][0], v2[1][0]
     length := math.Sqrt((x2-x1)*(x2-x1) + (y2-y1)*(y2-y1))
@@ -99,7 +99,7 @@ func line(v1, v2 [][]float64, board [][]rune, texture rune) {
     }
 }
 
-/*draw vector with v1 as offset and v2 as direction and size*/
+//draw vector with v1 as offset and v2 as direction and size
 func drawVec(v1, v2 [][]float64, board [][]rune, texture rune) {
     line(v1, matAdd(v1, v2), board, texture)
 }

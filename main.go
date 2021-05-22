@@ -4,6 +4,7 @@ import (
 	"time"
 	"math"
 	"seehuhn.de/go/ncurses"
+	// "github.com/pkg/profile"
 )
 
 // REMEMBER TO USE POINTERS and fix printB()
@@ -23,8 +24,10 @@ var blank = ' '
 // var unblank = '.'
 
 func main() {
+	// defer profile.Start(profile.MemProfile).Stop()
+	// defer profile.Start().Stop()
     if ncursed == 1 {defer ncurses.EndWin()}
-    demo8()
+    demo7()
 }
 
 func demo8() { // load obj files

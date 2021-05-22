@@ -11,7 +11,7 @@ import (
 
 // helper functions
 
-/*use this to represent multiple coords in 1 matrix*/
+//use this to represent multiple coords in 1 matrix
 func matAppend(mat [][]float64, mats... [][]float64) {
     for c := 0; c < len(mat); c++ {
         for _, mat1 := range mats {
@@ -20,7 +20,7 @@ func matAppend(mat [][]float64, mats... [][]float64) {
     }
 }
 
-/*returns a 3d vector from the given column no.*/
+//returns a 3d vector from the given column no.
 func getCoord3d(mat [][]float64, n int) [][]float64 {
     return vector( // convert this into a n dimentional instead of jusst 3
         mat[0][n],
@@ -30,7 +30,7 @@ func getCoord3d(mat [][]float64, n int) [][]float64 {
     )
 }
 
-/*multiplies matrix with each coord (edits original vertices)*/
+//multiplies matrix with each coord (edits original vertices)
 func transform(mat [][]float64, vertices [][][]float64) {
     length := len(vertices)
     for i := 0; i < length; i++ {
@@ -49,9 +49,9 @@ type cuboid struct{
     camoords [][][]float64
 }
 
-/*creates vertices of cube from given centre and half diagonal vectors.
-stores them in cube.coords in a single 4 by 8 matrix
-o is centre and u is half diagonal vector*/
+// creates vertices of cube from given centre and half diagonal vectors.
+// stores them in cube.coords in a single 4 by 8 matrix
+// o is centre and u is half diagonal vector
 func (cu *cuboid) create(o, u [][]float64) {
     cu.camoords = make([][][]float64, 8) // initiallise camoords
     // creating cube parallel to axes by default
@@ -70,7 +70,7 @@ func (cu *cuboid) create(o, u [][]float64) {
     }
 }
 
-/*draws the cuboid on canvas using camoords*/
+//draws the cuboid on canvas using camoords
 func (cu *cuboid) draw(board [][]rune, texture rune) {
     for i := 0; i < 4; i++ { // connecting vertices by lines
         line(cu.camoords[i], cu.camoords[(i+1)%4], board, texture)
@@ -89,13 +89,13 @@ func (tri *triangle) create(a, b, c [][]float64) {
     tri.camtices = [][][]float64 {a, b, c}
 }
 
-/*returns the normal of the triangle in 3d space (tri.vertices).
-normal in the direction of the visible face (anticlocck)*/
+// returns the normal of the triangle in 3d space (tri.vertices).
+// normal in the direction of the visible face (anticlocck)
 func (tri *triangle) normal() [][]float64 {
     return vecCross(matSub(tri.vertices[1], tri.vertices[0]), matSub(tri.vertices[2], tri.vertices[0]))
 }
 
-/*draws triangle using camtices*/
+//draws triangle using camtices
 func (tri *triangle) draw(camPos *[][]float64, board [][]rune, texture rune) {
     if vecDot(matSub(tri.vertices[0], *camPos), tri.normal()) >= 0 {return} // if the front(anticlockwise) face of triangle faces away from/perpendicular to cam, dont draw 
     // >= cuz both vectors have different origin
@@ -105,7 +105,7 @@ func (tri *triangle) draw(camPos *[][]float64, board [][]rune, texture rune) {
     }
 }
 
-/*fills up triangle using camtices*/
+//fills up triangle using camtices
 func (tri *triangle) fill(camPos *[][]float64, board [][]rune, zbuf [][]float64, texture rune) {
     if vecDot(matSub(tri.vertices[0], *camPos), tri.normal()) >= 0 {return} // if the front(anticlockwise) face of triangle faces away from/perpendicular to cam, dont draw 
     // >= cuz both vectors have different origin
@@ -143,7 +143,7 @@ type sphere struct {
     triangles []triangle
 }
 
-/*creates and joins vertices of a sphere from triangles*/
+//creates and joins vertices of a sphere from triangles
 func (sp *sphere) create(o [][]float64, r float64, n int) {
     vertices := make([][][][]float64, n+1)
     dtheta := math.Pi/float64(n)
@@ -185,7 +185,7 @@ func (sp *sphere) fill(camPos *[][]float64, cammat [][]float64, board [][]rune, 
     }
 }
 
-/*multiplies the mat with coords of each triangle*/
+//multiplies the mat with coords of each triangle
 func (sp *sphere) transform(mat [][]float64) {
     for _, tri := range sp.triangles {
         transform(mat, tri.vertices)
@@ -270,7 +270,7 @@ func (ob *object) fill(camPos *[][]float64, cammat [][]float64, board [][]rune, 
     }
 }
 
-/*multiplies the mat with coords of each triangle*/
+//multiplies the mat with coords of each triangle
 func (ob *object) transform(mat [][]float64) {
     for _, tri := range ob.triangles {
         transform(mat, tri.vertices)

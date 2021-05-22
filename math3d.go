@@ -2,7 +2,7 @@ package main
 
 import "math"
 
-/*returns projection matrix with 1 and 1000 as near and far*/
+//returns projection matrix with 1 and 1000 as near and far
 func projectionMat() [][]float64 {
     cot := 1/math.Tan(fov/2)
     // scrDist := float64(xlim)*cot/2
@@ -17,7 +17,7 @@ func projectionMat() [][]float64 {
     )
 }
 
-/*returns rotation matrix z angle from z axis*/
+//returns rotation matrix z angle from z axis
 func rotMat3dz(z float64) [][]float64 {
     return matrix(4, 4,
         math.Cos(z), -math.Sin(z), 0, 0,
@@ -27,7 +27,7 @@ func rotMat3dz(z float64) [][]float64 {
     )
 }
 
-/*returns rotation matrix of y angle from y axis*/
+//returns rotation matrix of y angle from y axis
 func rotMat3dy(y float64) [][]float64 {
     return matrix(4, 4, // i cross k is -j
         math.Cos(y), 0, math.Sin(y), 0,
@@ -37,7 +37,7 @@ func rotMat3dy(y float64) [][]float64 {
     )
 }
 
-/*returns rotation matrix of x angle from x axis*/
+//returns rotation matrix of x angle from x axis
 func rotMat3dx(x float64) [][]float64 {
     return matrix(4, 4,
         1, 0, 0, 0,
@@ -47,10 +47,10 @@ func rotMat3dx(x float64) [][]float64 {
     )
 }
 
-/*returns a scaling matrix or whatever its called
-s is the scale factor and matsize is the len of square mat
-multiply a vector with it(vector to the right), and everything
-except the last row will be scaled*/
+//returns a scaling matrix or whatever its called
+// s is the scale factor and matsize is the len of square mat
+// multiply a vector with it(vector to the right), and everything
+// except the last row will be scaled
 func scaleMat(s float64, matsize int) [][]float64 {
     result := matrix(matsize, matsize)
     for i := 0; i < matsize-1 ; i++ {
@@ -60,7 +60,7 @@ func scaleMat(s float64, matsize int) [][]float64 {
     return result
 }
 
-/*returns 3d translation matrix (adds o to coords)*/
+//returns 3d translation matrix (adds o to coords)
 func transMat(o [][]float64) [][]float64 {
     if len(o[0]) != 1 {panic("transMat matrix shape error")}
     length := len(o)
@@ -79,17 +79,17 @@ func transMat(o [][]float64) [][]float64 {
     // return trans
 }
 
-/*returns translation matrix (subs o from coords*/
+//returns translation matrix (subs o from coords
 func transMatInv(o [][]float64) [][]float64 {
     return transMat(matMul(scaleMat(-1, len(o)), o))
 }
 
-/*adds back and forth translation to rotation matrix*/
+//adds back and forth translation to rotation matrix
 func rotAboutPoint(rot ,o [][]float64) [][]float64 {
     return nMatMul(transMat(o), rot, transMatInv(o))
 }
 
-/*axis passes through the origin. (translate to other point to get other axes)*/
+//axis passes through the origin. (translate to other point to get other axes)
 func rotAboutVec(angle float64, axis [][]float64) [][]float64 {
     // y and z are angles around y and z axes.
     // transforming the axis into x-axis
@@ -104,7 +104,7 @@ func rotAboutVec(angle float64, axis [][]float64) [][]float64 {
     return nMatMul(ryinv, rzinv, rot, rz, ry)
 }
 
-/*returns the cross product of two 3d vectors(4 by 1)*/
+//returns the cross product of two 3d vectors(4 by 1)
 func vecCross(vec1, vec2 [][]float64) [][]float64 {
     return matrix(4, 1,
         vec1[1][0]*vec2[2][0]-vec2[1][0]*vec1[2][0],

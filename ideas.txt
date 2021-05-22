@@ -63,10 +63,10 @@
           . for the world option, remove the transform from tri.fill() and stuff
         . change to pointers wherever vertices are required
         . transform should directly change the vertices (maybe)
-      . POINT 12 from above
-        . this could make a huge difference (maybe)
-          . or it may just improve speed by 1 frame
-        . but will also cause glitch effects
+      /. POINT 12 from above (aint doin this)
+        /. this could make a huge difference (maybe)
+          /. or it may just improve speed by 1 frame
+        /. but will also cause glitch effects
         . save camMat with camera
     . new rasterisation method (similar to 1st (attempt 3)) (phone camera gallery)
       . change line() too

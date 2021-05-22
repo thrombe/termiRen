@@ -3,7 +3,7 @@ import (
     "math"
 )
 
-/*returns a matrix with entered values or empty matrix if no values entered*/
+//returns a matrix with entered values or empty matrix if no values entered
 func matrix(rows, cols int, vals ...float64) [][]float64 {
     if len(vals) != rows*cols {
         if len(vals) == 0 {vals = make([]float64, rows*cols)} else {panic("matrix() not enough values")}
@@ -15,12 +15,12 @@ func matrix(rows, cols int, vals ...float64) [][]float64 {
     return mat
 }
 
-/*returns a len(values), 1 matrix*/
+//returns a len(values), 1 matrix
 func vector(vals ...float64) [][]float64 {
     return matrix(len(vals), 1, vals...)
 }
 
-/*multiply matrices of arbitary sizes(legal only ofc)*/
+//multiply matrices of arbitary sizes(legal only ofc)
 func matMul(mat1, mat2 [][]float64) [][]float64 {
     m1rows, m1cols, m2rows, m2cols := len(mat1), len(mat1[0]), len(mat2), len(mat2[0])
     if m1cols != m2rows {panic("matMul shape error")}
@@ -35,7 +35,7 @@ func matMul(mat1, mat2 [][]float64) [][]float64 {
     return result
 }
 
-/*multiply any no. of matrices (in order)*/
+//multiply any no. of matrices (in order)
 func nMatMul(mats...[][]float64) [][]float64 {
     if len(mats) < 2 {panic("not enogh matrices in nMatMul")}
     var result [][]float64
@@ -46,7 +46,7 @@ func nMatMul(mats...[][]float64) [][]float64 {
     return result
 }
 
-/*returns the addition of two similarly shaped matrices*/
+//returns the addition of two similarly shaped matrices
 func matAdd(mat1, mat2 [][]float64) [][]float64 {
     m1rows, m1cols, m2rows, m2cols := len(mat1), len(mat1[0]), len(mat2), len(mat2[0])
     if !(m1rows == m2rows && m1cols == m2cols) {panic("matAdd shape error")}
@@ -59,7 +59,7 @@ func matAdd(mat1, mat2 [][]float64) [][]float64 {
     return result
 }
 
-/*multiply any no. of matrices (in order)*/
+//multiply any no. of matrices (in order)
 func nMatAdd(mats...[][]float64) [][]float64 {
     if len(mats) < 2 {panic("not enogh matrices in nMatMul")}
     var result [][]float64
@@ -69,8 +69,8 @@ func nMatAdd(mats...[][]float64) [][]float64 {
     }
     return result
 }
-
-/*returns the addition of multiple similarly shaped matrices*//*
+/*
+//returns the addition of multiple similarly shaped matrices
 func matAdd2(mats...[][]float64) [][]float64 {
     if len(mats) < 2 {panic("not enogh matrices in matAdd")}
     m1rows, m1cols := len(mats[0]), len(mats[0][0])
@@ -87,7 +87,7 @@ func matAdd2(mats...[][]float64) [][]float64 {
     return result
 }*/
 
-/*returns the subtraction of the second matrix from first*/
+//returns the subtraction of the second matrix from first
 func matSub(mat1, mat2 [][]float64) [][]float64 {
     m1rows, m1cols, m2rows, m2cols := len(mat1), len(mat1[0]), len(mat2), len(mat2[0])
     if !(m1rows == m2rows && m1cols == m2cols) {panic("matSub shape error")}
@@ -100,7 +100,7 @@ func matSub(mat1, mat2 [][]float64) [][]float64 {
     return result
 }
 
-/*multiply a scalar to a matrix*/
+//multiply a scalar to a matrix
 func matScalar(mat [][]float64, scale float64) [][]float64 {
     mrows, mcols := len(mat), len(mat[0])
     result := matrix(mrows, mcols)
@@ -112,7 +112,7 @@ func matScalar(mat [][]float64, scale float64) [][]float64 {
     return result
 }
 
-/*remember to input y and x index resp. */
+//remember to input y and x index resp.
 func subMat(mat [][]float64, y, x int) [][]float64 {
     mrows := len(mat)
     submat := matrix(mrows-1, mrows-1)
@@ -130,7 +130,7 @@ func subMat(mat [][]float64, y, x int) [][]float64 {
     //return matScalar(submat, math.Pow(-1, float64(x+y)))
 }
 
-/*returns determinant of a square matrix*/
+//returns determinant of a square matrix
 func matDet(mat [][]float64) float64 {
     mrows, mcols := len(mat), len(mat[0])
     if mrows != mcols {panic("matDet non square matrix")}
@@ -142,7 +142,7 @@ func matDet(mat [][]float64) float64 {
     return result
 }
 
-/*returns transpose of a matrix*/
+//returns transpose of a matrix
 func matTranspose(mat [][]float64) [][]float64 {
     mrows, mcols := len(mat), len(mat[0])
     result := matrix(mcols, mrows)
@@ -154,7 +154,7 @@ func matTranspose(mat [][]float64) [][]float64 {
     return result
 }
 
-/*returns the size of a n-dimentional vector*/
+//returns the size of a n-dimentional vector
 func vecSize(vec [][]float64) float64 {
     if len(vec[0]) > 1 {panic("vecSize not a vector")}
     vecDimensions := len(vec)
@@ -165,7 +165,7 @@ func vecSize(vec [][]float64) float64 {
     return math.Sqrt(result)
 }
 
-/*returns unit vector in the same direction*/
+//returns unit vector in the same direction
 func vecUnit(vec [][]float64) [][]float64 {
     size := vecSize(vec)
     rows := len(vec)
@@ -177,7 +177,7 @@ func vecUnit(vec [][]float64) [][]float64 {
     return result
 }
 
-/*returns dot of 2 vectors*/
+//returns dot of 2 vectors
 func vecDot(vec1, vec2 [][]float64) float64 {
     if len(vec1[0]) > 1 || len(vec2[0]) > 1 {panic("vecDot not a vector")}
     if len(vec1) != len(vec2) {panic("vecDot vectors of different dimentions")}
@@ -189,19 +189,19 @@ func vecDot(vec1, vec2 [][]float64) float64 {
     return result
 }
 
-/* returns modulus of the no. |n| */
+// returns modulus of the no. |n|
 func absVal(n float64) float64 {
     if n >= 0 {return n} else {return -n}
 }
 
-/*rounds to nearest int and retrun int*/
+//rounds to nearest int and retrun int
 func round(i float64) int {
     return int(math.Round(i))
     //llim := int(i)
     //if i-float64(llim) >= 0.5 {return llim+1} else {return llim}
 }
-
-/*returns a func that returns if a point lies in a triangle (2d)*//*
+/*
+//returns a func that returns if a point lies in a triangle (2d)
 func inTriangle(vertices [][][]float64) func([][]float64) bool {
     v1v2 := matSub(vertices[1], vertices[0])
     v1v3 := matSub(vertices[2], vertices[0])
