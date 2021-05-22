@@ -6,7 +6,7 @@ import (
     )
 
 /*returns a generator style func that prints the board and also clears zbuf and the board*/
-func perint(rawboard []rune, board [][]rune, zbuf []float64) (*ncurses.Window, func()) {
+func perint(rawboard []rune, board [][]rune, zbuf [][]float64) (*ncurses.Window, func()) {
     if ncursed == 1 {
         win := ncurses.Init()
         // xlim, ylim = win.GetMaxYX() // donno if its x, y or y, x
@@ -19,7 +19,7 @@ func perint(rawboard []rune, board [][]rune, zbuf []float64) (*ncurses.Window, f
             for y := 0; y < ylim; y++ { // clear board and zbuf
                 for x := 0; x < xlim; x++ {
                     board[y][x] = blank
-                    zbuf[y*xlim + x] = -2 // -1 should be the clip limit (1000 i think, as defined in projection matrix)
+                    zbuf[y][x] = -2 // -1 should be the clip limit (1000 i think, as defined in projection matrix)
                 }
             }
         }
@@ -29,7 +29,7 @@ func perint(rawboard []rune, board [][]rune, zbuf []float64) (*ncurses.Window, f
             for y := 0; y < ylim; y++ {
                 for x := 0; x < xlim; x++ {
                     board[y][x] = blank
-                    zbuf[y*xlim + x] = -2
+                    zbuf[y][x] = -2
                 }
             }
         }
@@ -37,18 +37,20 @@ func perint(rawboard []rune, board [][]rune, zbuf []float64) (*ncurses.Window, f
 }
 
 /*make a canvas*/
-func genB() ([]rune, [][]rune, []float64) {
+func genB() ([]rune, [][]rune, [][]float64) {
     rawboard := make([]rune, (xlim+1)*ylim)
     board := make([][]rune, ylim)
-    zbuf := make([]float64, xlim*ylim)
+    zbufrray := make([]float64, xlim*ylim)
+    zbuf := make([][]float64, ylim)
     var xini, xfin int = 0, xlim-1
     for y := 0; y < ylim; y++ {
         board[y] = rawboard[xini : xfin+1]
         rawboard[xfin+1] = '\n'
         xini += xlim-1+2
         xfin = xini+xlim-1
+        zbuf[y] = zbufrray[y*xlim : (y+1)*xlim]
         for x := 0; x < xlim; x++ {
-            zbuf[y*xlim + x] = -2
+            zbuf[y][x] = -2
         }
     }
     return rawboard, board, zbuf
@@ -73,11 +75,11 @@ func point(h, k float64, board [][]rune, texture rune) {
 }
 
 /*draws a 3d point on canvas using zbuf*/
-func point3d(p [][]float64, board [][]rune, zbuf []float64, texture rune) {
+func point3d(p [][]float64, board [][]rune, zbuf [][]float64, texture rune) {
     x, y := giveInd(p[0][0], p[1][0]*charRatio)
     if !(0 <= x && x < xlim && 0 <= y && y < ylim) {return}
-    if zbuf[y*xlim + x] < p[2][0] {
-        zbuf[y*xlim + x] = p[2][0]
+    if zbuf[y][x] < p[2][0] {
+        zbuf[y][x] = p[2][0]
         board[y][x] = texture
     }
 }

@@ -106,7 +106,7 @@ func (tri *triangle) draw(camPos *[][]float64, board [][]rune, texture rune) {
 }
 
 /*fills up triangle using camtices*/
-func (tri *triangle) fill(camPos *[][]float64, board [][]rune, zbuf []float64, texture rune) {
+func (tri *triangle) fill(camPos *[][]float64, board [][]rune, zbuf [][]float64, texture rune) {
     if vecDot(matSub(tri.vertices[0], *camPos), tri.normal()) >= 0 {return} // if the front(anticlockwise) face of triangle faces away from/perpendicular to cam, dont draw 
     // >= cuz both vectors have different origin
     
@@ -177,7 +177,7 @@ func (sp *sphere) draw(camPos *[][]float64, cammat [][]float64, board [][]rune, 
     }
 }
 
-func (sp *sphere) fill(camPos *[][]float64, cammat [][]float64, board [][]rune, zbuf []float64, texture rune) {
+func (sp *sphere) fill(camPos *[][]float64, cammat [][]float64, board [][]rune, zbuf [][]float64, texture rune) {
     for _, tri := range sp.triangles {
         copy(tri.camtices, tri.vertices)
         transform(cammat, tri.camtices)
@@ -262,7 +262,7 @@ func (ob *object) draw(camPos *[][]float64, cammat [][]float64, board [][]rune, 
     }
 }
 
-func (ob *object) fill(camPos *[][]float64, cammat [][]float64, board [][]rune, zbuf []float64, texture rune) {
+func (ob *object) fill(camPos *[][]float64, cammat [][]float64, board [][]rune, zbuf [][]float64, texture rune) {
     for _, tri := range ob.triangles {
         copy(tri.camtices, tri.vertices)
         transform(cammat, tri.camtices)

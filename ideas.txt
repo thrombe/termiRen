@@ -56,17 +56,6 @@
 . plan
     . profiling to see whats slowing down
     . optimise (just the mesh part and not the fill)
-      . create matrix()
-         . do this in mathStuff
-           /. mathStuff
-           /. camera
-           eh. main
-           /. math3d
-           /. projection
-           /. world
-         . returns [][]float but its just 1 []float with more slices of that array (like the board)
-         . takes in rows, cols, ...float64
-         . this prevents from making 5 slices per 4 row matix
       . doing copy() and then transform() in fill() ans stuff is inefficient
       . store all vertices in a single array to prevent copies.
         . point 7 from above
@@ -74,7 +63,6 @@
           . for the world option, remove the transform from tri.fill() and stuff
         . change to pointers wherever vertices are required
         . transform should directly change the vertices (maybe)
-        . convert zbuf to the single array multi-slice thing (like board)
       . POINT 12 from above
         . this could make a huge difference (maybe)
           . or it may just improve speed by 1 frame
