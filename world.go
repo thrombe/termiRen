@@ -22,12 +22,12 @@ func matAppend(mat [][]float64, mats... [][]float64) {
 
 /*returns a 3d vector from the given column no.*/
 func getCoord3d(mat [][]float64, n int) [][]float64 {
-    return [][]float64 { // convert this into a n dimentional instead of jusst 3
-        {mat[0][n]},
-        {mat[1][n]},
-        {mat[2][n]},
-        {mat[3][n]},
-    }
+    return vector( // convert this into a n dimentional instead of jusst 3
+        mat[0][n],
+        mat[1][n],
+        mat[2][n],
+        mat[3][n],
+    )
 }
 
 /*multiplies matrix with each coord (edits original vertices)*/
@@ -152,7 +152,7 @@ func (sp *sphere) create(o [][]float64, r float64, n int) {
     for j := 0; j < n+1; j++ {
         vertices[j] = make([][][]float64, n)
         for i := 0; i < n; i++ {
-            vertices[j][i] = [][]float64 {{r*math.Sin(theta)*math.Cos(phi)}, {r*math.Cos(theta)}, {r*math.Sin(theta)*math.Sin(phi)}, {0}} // 4th col is 0 cuz o has 1 there
+            vertices[j][i] = vector(r*math.Sin(theta)*math.Cos(phi), r*math.Cos(theta), r*math.Sin(theta)*math.Sin(phi), 0) // 4th col is 0 cuz o has 1 there
             vertices[j][i] = matAdd(vertices[j][i], o)
             phi += dphi
         }
@@ -207,24 +207,24 @@ func (ob *object) create(path string, o [][]float64) {
 	for sc.Scan() {
 		text := sc.Text()
         if len(text) == 0 {continue}
-		switch text[0] {
-		case 'v':
+		switch text[ : 2] {
+		case "v ":
 			texx := strings.Split(text[2:], " ")
-			vertex := make([][]float64, 4)
+            vertex := matrix(4, 1)
 			for i := 0; i < 3; i++ {
 				num, err := strconv.ParseFloat(texx[i], 64)
 				if err != nil {panic(err)}
-				vertex[i] = []float64 {num}
+				vertex[i][0] = num
 			}
-			vertex[3] = []float64 {1}
+			vertex[3][0] = 1
             vertex = matAdd(vertex, o)
-			vertex[3] = []float64 {1} // if 0 has a 1 in 4th col, it could cause probs
+			vertex[3][0] = 1 // if 0 has a 1 in 4th col, it could cause probs
 			vertices = append(vertices, vertex)
-		case 'f':
+		case "f ":
 			texx := strings.Split(text[2:], " ")
 			face := make([]float64, 3)
 			for i := 0; i < 3; i++ {
-				face[i], err = strconv.ParseFloat(texx[i], 64)
+				face[i], err = strconv.ParseFloat(strings.Split(texx[i], "/")[0], 64)
 				if err != nil {panic(err)}
 				face[i]--
 			}
@@ -235,7 +235,7 @@ func (ob *object) create(path string, o [][]float64) {
     
     // // finding the centre of a object
     // i := 0
-    // cen := [][]float64 {{0}, {0}, {0}, {0}}
+    // cen := vector(0, 0, 0, 0)
     // for _, vertex := range vertices {
     //     i++
     //     cen = matAdd(cen, vertex)

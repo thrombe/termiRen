@@ -7,19 +7,19 @@ import (
 
 /*creates a default position and direction for the camera*/
 func camInit() ([][]float64, [][]float64) {
-	camPos := [][]float64 {{0}, {0}, {0}, {1}}
-	camDir := [][]float64 {{0}, {0}, {-tranV}, {0}}
+	camPos := vector(0, 0, 0, 1)
+	camDir := vector(0, 0, -tranV, 0)
 	return camPos, camDir
 }
 
 /*detects keys and sends curresponding matrix to the channel*/
 func detectKey(camPos, camDir *[][]float64, win *ncurses.Window, matchan chan [][]float64, quitchan chan bool) {
 	mat := transMat(*camPos)
-	up := [][]float64 {{0}, {tranV}, {0}, {0}}
-	hor := [][]float64 {{tranV}, {0}, {0}, {0}}
-	fwd := [][]float64 {{0}, {0}, {-tranV}, {0}}
-	camup := [][]float64 {{0}, {tranV}, {0}, {0}}
-	camhor := [][]float64 {{tranV}, {0}, {0}, {0}}
+	up := vector(0, tranV, 0, 0)
+	hor := vector(tranV, 0, 0, 0)
+	fwd := vector(0, 0, -tranV, 0)
+	camup := vector(0, tranV, 0, 0)
+	camhor := vector(tranV, 0, 0, 0)
 	proj := projectionMat()
 	for {
 		kee := win.GetCh()

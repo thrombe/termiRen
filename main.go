@@ -28,13 +28,13 @@ func main() {
 }
 
 func demo8() { // load obj files
-	o := [][]float64 {{0}, {0}, {-10}, {1}}
+	o := vector(0, 0, -10, 1)
 	// axis := [][]float64 {{1}, {1}, {-1}, {0}}
 	// rot := rotAboutVec(0.2, axis)
 	rot := rotMat3dy(0.0)
 	rot = rotAboutPoint(rot, o)
 	obj := object{}
-	obj.create("./objects/teapot.obj", o)
+	obj.create("./objects/teapot.obj", o) // 47.2k triangles 23.36k vertices in big chungus
 	rawboard, board, zbuf := genB()
 	win, printy:= perint(rawboard, board, zbuf)
 
