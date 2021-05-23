@@ -113,3 +113,18 @@ func vecCross(vec1, vec2 [][]float64) [][]float64 {
         0,
     )
 }
+
+// multiplies matrix to 3D vector, but dosent make a copy. 
+// enter 1 or 2 vectors, multiplication of mat and 1st is saved in second (or 1st if second not entered)
+func vecMul(mat [][]float64, veclist ...[][]float64) {
+    var vec, savein [][]float64
+    switch len(veclist) {
+    case 1:
+        vec, savein = veclist[0], veclist[0]
+    case 2:
+        vec, savein = veclist[0], veclist[1]
+    }
+
+    // this had to be done in 1 line
+    savein[0][0], savein[1][0], savein[2][0], savein[3][0] = (mat[0][0]*vec[0][0] + mat[0][1]*vec[1][0] + mat[0][2]*vec[2][0] + mat[0][3]*vec[3][0]), (mat[1][0]*vec[0][0] + mat[1][1]*vec[1][0] + mat[1][2]*vec[2][0] + mat[1][3]*vec[3][0]), (mat[2][0]*vec[0][0] + mat[2][1]*vec[1][0] + mat[2][2]*vec[2][0] + mat[2][3]*vec[3][0]), (mat[3][0]*vec[0][0] + mat[3][1]*vec[1][0] + mat[3][2]*vec[2][0] + mat[3][3]*vec[3][0])
+}

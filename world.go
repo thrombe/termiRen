@@ -30,7 +30,8 @@ func getCoord3d(mat [][]float64, n int) [][]float64 {
     )
 }
 
-//multiplies matrix with each coord (edits original vertices)
+//multiplies matrix with each coord.
+// enter 1 or 2 vector lists, multiplication of mat and 1st is saved in second (or 1st if second not entered)
 func transform(mat [][]float64, verlists ...[][][]float64) {
     var vertices, savein [][][]float64
     if len(verlists) == 2 {
@@ -42,7 +43,8 @@ func transform(mat [][]float64, verlists ...[][][]float64) {
     }
     length := len(vertices)
     for i := 0; i < length; i++ {
-        savein[i] = matMul(mat, vertices[i])
+        // savein[i] = matMul(mat, vertices[i])
+        vecMul(mat, vertices[i], savein[i])
         if savein[i][3][0] != 1 { // if the forth column if vector isnt 1, then scale the vector
             if round(savein[i][3][0]*1000) == 0 {panic("divide by 0 in transform()")}
             savein[i] = matScalar(savein[i], 1/savein[i][3][0])//*math.Tan(fov/2))) // is the cot extra??????????????
@@ -176,13 +178,12 @@ func (sp *sphere) create(o [][]float64, r float64, n int) {
         for i := 0; i < n; i++ {
             vertex := vector(r*math.Sin(theta)*math.Cos(phi), r*math.Cos(theta), r*math.Sin(theta)*math.Sin(phi), 0) // 4th col is 0 cuz o has 1 there
             sp.vertices = append(sp.vertices, matAdd(vertex, o))
+            sp.camtices = append(sp.camtices, vector(vertex[0][0], vertex[1][0], vertex[2][0], vertex[3][0]))
             phi += dphi
         }
         theta += dtheta
     }
 
-    sp.camtices = make([][][]float64, len(sp.vertices))
-    copy(sp.camtices, sp.vertices)
     sp.triangles = make([]triangle, n*(2*n))
     for j := 0; j < n; j++ {
         for i := 0; i < n; i++ {
@@ -256,6 +257,7 @@ func (ob *object) create(path string, o [][]float64) {
             vertex = matAdd(vertex, o)
 			vertex[3][0] = 1 // if 0 has a 1 in 4th col, it could cause probs
 			ob.vertices = append(ob.vertices, vertex)
+            ob.camtices = append(ob.camtices, vector(vertex[0][0], vertex[1][0], vertex[2][0], vertex[3][0]))
 		case "f ":
 			texx := strings.Split(text[2:], " ")
 			face := make([]float64, 3)
@@ -268,8 +270,6 @@ func (ob *object) create(path string, o [][]float64) {
 			faces = append(faces, face)
 		}
  	}
-    ob.camtices = make([][][]float64, len(ob.vertices))
-    copy(ob.camtices, ob.vertices)
 
     // // finding the centre of a object
     // i := 0

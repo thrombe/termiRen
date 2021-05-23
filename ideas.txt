@@ -54,6 +54,8 @@
 
 . plan
     . optimise (just the mesh part and not the fill)
+      /. make a vecMult function that multiplies matrix to a vector, but hard code the expanded from
+        doing this enables to directly store the transformed vertices in vertices[][][]float and not have to make a copy
       . doing copy() and then transform() in fill() ans stuff is inefficient
       . store all vertices in a single array to prevent copies.
         . point 7 from above
