@@ -31,13 +31,21 @@ func getCoord3d(mat [][]float64, n int) [][]float64 {
 }
 
 //multiplies matrix with each coord (edits original vertices)
-func transform(mat [][]float64, vertices [][][]float64) {
+func transform(mat [][]float64, verlists ...[][][]float64) {
+    var vertices, savein [][][]float64
+    if len(verlists) == 2 {
+        vertices = verlists[0]
+        savein = verlists[1]
+    } else {
+        vertices = verlists[0]
+        savein = verlists[0]
+    }
     length := len(vertices)
     for i := 0; i < length; i++ {
-        vertices[i] = matMul(mat, vertices[i])
-        if vertices[i][3][0] != 1 { // if the forth column if vector isnt 1, then scale the vector
-            if round(vertices[i][3][0]*1000) == 0 {panic("divide by 0 in transform()")}
-            vertices[i] = matScalar(vertices[i], 1/vertices[i][3][0])//*math.Tan(fov/2))) // is the cot extra??????????????
+        savein[i] = matMul(mat, vertices[i])
+        if savein[i][3][0] != 1 { // if the forth column if vector isnt 1, then scale the vector
+            if round(savein[i][3][0]*1000) == 0 {panic("divide by 0 in transform()")}
+            savein[i] = matScalar(savein[i], 1/savein[i][3][0])//*math.Tan(fov/2))) // is the cot extra??????????????
         }
     }
 }
@@ -45,15 +53,15 @@ func transform(mat [][]float64, vertices [][][]float64) {
 // objects
 
 type cuboid struct{
-    coords [][][]float64
-    camoords [][][]float64
+    vertices [][][]float64
+    camtices [][][]float64
 }
 
 // creates vertices of cube from given centre and half diagonal vectors.
 // stores them in cube.coords in a single 4 by 8 matrix
 // o is centre and u is half diagonal vector
 func (cu *cuboid) create(o, u [][]float64) {
-    cu.camoords = make([][][]float64, 8) // initiallise camoords
+    cu.camtices = make([][][]float64, 8) // initiallise camoords
     // creating cube parallel to axes by default
     u = [][]float64 { // another method for this is rotating the original u by some angle (pi/2 in case of cubes) in different planes
         {u[0][0], u[0][0], -u[0][0], -u[0][0], u[0][0], u[0][0], -u[0][0], -u[0][0]},
@@ -64,59 +72,73 @@ func (cu *cuboid) create(o, u [][]float64) {
     coords := make([][]float64, 4)
     matAppend(coords, o, o, o, o, o, o, o, o)
     coords = matAdd(coords, u)
-    cu.coords = make([][][]float64, 8)
+    cu.vertices = make([][][]float64, 8)
     for i := 0; i < 8; i++ {
-        cu.coords[i] = getCoord3d(coords, i)
+        cu.vertices[i] = getCoord3d(coords, i)
     }
+    cu.camtices = make([][][]float64, len(cu.vertices))
+    copy(cu.camtices, cu.vertices)
 }
 
 //draws the cuboid on canvas using camoords
-func (cu *cuboid) draw(board [][]rune, texture rune) {
+func (cu *cuboid) draw(cammat [][]float64, board [][]rune, texture rune) {
+    transform(cammat, cu.vertices, cu.camtices)
     for i := 0; i < 4; i++ { // connecting vertices by lines
-        line(cu.camoords[i], cu.camoords[(i+1)%4], board, texture)
-        line(cu.camoords[i+4], cu.camoords[4+(i+1)%4], board, texture)
-        line(cu.camoords[i], cu.camoords[i+4], board, texture)
+        line(cu.camtices[i], cu.camtices[(i+1)%4], board, texture)
+        line(cu.camtices[i+4], cu.camtices[4+(i+1)%4], board, texture)
+        line(cu.camtices[i], cu.camtices[i+4], board, texture)
     }
 }
 
-type triangle struct{
-    vertices [][][]float64
-    camtices [][][]float64 // the world matrix is multiplied with vertices and is stored here. for methods on triangke
+func (cu *cuboid) transform(mat [][]float64) {
+    transform(mat, cu.vertices)
 }
 
-func (tri *triangle) create(a, b, c [][]float64) {
-    tri.vertices = [][][]float64 {a, b, c}
-    tri.camtices = [][][]float64 {a, b, c}
+type triangle struct{
+    vertices []*[][]float64
+    camtices []*[][]float64 // the world matrix is multiplied with vertices and is stored here. for methods on triangke
+}
+
+func (tri *triangle) create(vers ...*[][]float64) {
+    if len(vers) == 3 {
+        tri.vertices = []*[][]float64 {vers[0], vers[1], vers[2]}
+        tri.camtices = []*[][]float64 {vers[0], vers[1], vers[2]}
+    } else if len(vers) == 6 {
+        tri.vertices = []*[][]float64 {vers[0], vers[1], vers[2]}
+        tri.camtices = []*[][]float64 {vers[3], vers[4], vers[5]}
+    } else {
+        panic("tri.create strange no. of vertices given")
+    }
 }
 
 // returns the normal of the triangle in 3d space (tri.vertices).
 // normal in the direction of the visible face (anticlocck)
 func (tri *triangle) normal() [][]float64 {
-    return vecCross(matSub(tri.vertices[1], tri.vertices[0]), matSub(tri.vertices[2], tri.vertices[0]))
+    return vecCross(matSub(*tri.vertices[1], *tri.vertices[0]), matSub(*tri.vertices[2], *tri.vertices[0]))
 }
 
 //draws triangle using camtices
 func (tri *triangle) draw(camPos *[][]float64, board [][]rune, texture rune) {
-    if vecDot(matSub(tri.vertices[0], *camPos), tri.normal()) >= 0 {return} // if the front(anticlockwise) face of triangle faces away from/perpendicular to cam, dont draw 
+    if vecDot(matSub(*tri.vertices[0], *camPos), tri.normal()) >= 0 {return} // if the front(anticlockwise) face of triangle faces away from/perpendicular to cam, dont draw 
     // >= cuz both vectors have different origin
 
     for i := 0; i < 3; i++ {
-        line(tri.camtices[i], tri.camtices[(i+1)%3], board, texture)
+        line(*tri.camtices[i], *tri.camtices[(i+1)%3], board, texture)
     }
 }
 
 //fills up triangle using camtices
 func (tri *triangle) fill(camPos *[][]float64, board [][]rune, zbuf [][]float64, texture rune) {
-    if vecDot(matSub(tri.vertices[0], *camPos), tri.normal()) >= 0 {return} // if the front(anticlockwise) face of triangle faces away from/perpendicular to cam, dont draw 
+    if vecDot(matSub(*tri.vertices[0], *camPos), tri.normal()) >= 0 {return} // if the front(anticlockwise) face of triangle faces away from/perpendicular to cam, dont draw 
     // >= cuz both vectors have different origin
     
     i := 0
     for _, vert := range tri.camtices { // if traingle is outside the screen, dont draw
-        if absVal(vert[0][0]) > float64(xlim)/2 || absVal(vert[1][0])*charRatio > float64(ylim)/2 {i++}
+        if absVal((*vert)[0][0]) > float64(xlim)/2 || absVal((*vert)[1][0])*charRatio > float64(ylim)/2 {i++}
     }
     if i == 3 {return}
     
-    lightDir := matSub(tri.vertices[0], *camPos)
+    lightDir := matSub(*tri.vertices[0], *camPos)
     // lightDir := [][]float64 {{-1}, {-1}, {-2}, {0}} // from +z to -z
     tex := vecDot(vecUnit(lightDir), vecUnit(tri.normal())) // 0 to 1
     // textures := ".`^,:;Il!i~+_-?][}{!)(|/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao*#MW&8%B@$"
@@ -125,9 +147,9 @@ func (tri *triangle) fill(camPos *[][]float64, board [][]rune, zbuf [][]float64,
     if tex < 0 {tex = 0}
     texture = rune(textures[round(tex)])
     
-    v1 := tri.camtices[0]
-    v21 := matSub(tri.camtices[1], v1)
-    v31 := matSub(tri.camtices[2], v1)
+    v1 := *tri.camtices[0]
+    v21 := matSub(*tri.camtices[1], v1)
+    v31 := matSub(*tri.camtices[2], v1)
     dw2, dw3 := 1.0/vecSize(v21), 1.0/vecSize(v31)
     for w2 := 1.0; w2 >= 0; w2 -= dw2 {
         for w3 := 0.0; w3 <= 1-w2; w3 += dw3 {
@@ -140,59 +162,74 @@ func (tri *triangle) fill(camPos *[][]float64, board [][]rune, zbuf [][]float64,
 }
 
 type sphere struct {
+    vertices [][][]float64
+    camtices [][][]float64
     triangles []triangle
 }
 
 //creates and joins vertices of a sphere from triangles
 func (sp *sphere) create(o [][]float64, r float64, n int) {
-    vertices := make([][][][]float64, n+1)
     dtheta := math.Pi/float64(n)
     dphi := dtheta*2
     var theta, phi float64
     for j := 0; j < n+1; j++ {
-        vertices[j] = make([][][]float64, n)
         for i := 0; i < n; i++ {
-            vertices[j][i] = vector(r*math.Sin(theta)*math.Cos(phi), r*math.Cos(theta), r*math.Sin(theta)*math.Sin(phi), 0) // 4th col is 0 cuz o has 1 there
-            vertices[j][i] = matAdd(vertices[j][i], o)
+            vertex := vector(r*math.Sin(theta)*math.Cos(phi), r*math.Cos(theta), r*math.Sin(theta)*math.Sin(phi), 0) // 4th col is 0 cuz o has 1 there
+            sp.vertices = append(sp.vertices, matAdd(vertex, o))
             phi += dphi
         }
         theta += dtheta
     }
+
+    sp.camtices = make([][][]float64, len(sp.vertices))
+    copy(sp.camtices, sp.vertices)
     sp.triangles = make([]triangle, n*(2*n))
     for j := 0; j < n; j++ {
         for i := 0; i < n; i++ {
             sp.triangles[j*n*2+i*2] = triangle{}
-            sp.triangles[j*n*2+i*2].create(vertices[j][i], vertices[j][(i+1)%n], vertices[j+1][i])
+            sp.triangles[j*n*2+i*2].create(
+                &sp.vertices[j*n+i], 
+                &sp.vertices[j*n+(i+1)%n], 
+                &sp.vertices[(j+1)*n+i],
+                &sp.camtices[j*n+i], 
+                &sp.camtices[j*n+(i+1)%n], 
+                &sp.camtices[(j+1)*n+i],
+            )
             sp.triangles[j*n*2+i*2+1] = triangle{}
-            sp.triangles[j*n*2+i*2+1].create(vertices[j+1][i], vertices[j][(i+1)%n], vertices[j+1][(i+1)%n])
+            sp.triangles[j*n*2+i*2+1].create(
+                &sp.vertices[(j+1)*n+i], 
+                &sp.vertices[j*n+(i+1)%n], 
+                &sp.vertices[(j+1)*n+(i+1)%n],
+                &sp.camtices[(j+1)*n+i], 
+                &sp.camtices[j*n+(i+1)%n], 
+                &sp.camtices[(j+1)*n+(i+1)%n],
+            )
         }
     }
 }
 
 func (sp *sphere) draw(camPos *[][]float64, cammat [][]float64, board [][]rune, texture rune) {
+    transform(cammat, sp.vertices, sp.camtices)
     for _, tri := range sp.triangles {
-        copy(tri.camtices, tri.vertices)
-        transform(cammat, tri.camtices)
         tri.draw(camPos, board, texture)
     }
 }
 
 func (sp *sphere) fill(camPos *[][]float64, cammat [][]float64, board [][]rune, zbuf [][]float64, texture rune) {
+    transform(cammat, sp.vertices, sp.camtices)
     for _, tri := range sp.triangles {
-        copy(tri.camtices, tri.vertices)
-        transform(cammat, tri.camtices)
         tri.fill(camPos, board, zbuf, texture)
     }
 }
 
 //multiplies the mat with coords of each triangle
 func (sp *sphere) transform(mat [][]float64) {
-    for _, tri := range sp.triangles {
-        transform(mat, tri.vertices)
-    }
+    transform(mat, sp.vertices)
 }
 
 type object struct {
+    vertices [][][]float64
+    camtices [][][]float64
     triangles []triangle
 }
 
@@ -202,7 +239,6 @@ func (ob *object) create(path string, o [][]float64) {
 	if err != nil {panic(err)}
 
 	sc := bufio.NewScanner(file) // parsing file
-	var vertices [][][]float64
 	var faces [][]float64
 	for sc.Scan() {
 		text := sc.Text()
@@ -219,7 +255,7 @@ func (ob *object) create(path string, o [][]float64) {
 			vertex[3][0] = 1
             vertex = matAdd(vertex, o)
 			vertex[3][0] = 1 // if 0 has a 1 in 4th col, it could cause probs
-			vertices = append(vertices, vertex)
+			ob.vertices = append(ob.vertices, vertex)
 		case "f ":
 			texx := strings.Split(text[2:], " ")
 			face := make([]float64, 3)
@@ -232,7 +268,9 @@ func (ob *object) create(path string, o [][]float64) {
 			faces = append(faces, face)
 		}
  	}
-    
+    ob.camtices = make([][][]float64, len(ob.vertices))
+    copy(ob.camtices, ob.vertices)
+
     // // finding the centre of a object
     // i := 0
     // cen := vector(0, 0, 0, 0)
@@ -245,34 +283,33 @@ func (ob *object) create(path string, o [][]float64) {
     // //
  	
  	for _, face := range faces { // creating triangles
- 	    a := vertices[int(face[0])]
- 	    b := vertices[int(face[1])]
- 	    c := vertices[int(face[2])]
- 	    tri := triangle{}
- 	    tri.create(a, b, c)
+        a := &ob.vertices[int(face[0])]
+        b := &ob.vertices[int(face[1])]
+        c := &ob.vertices[int(face[2])]
+        d := &ob.camtices[int(face[0])]
+        e := &ob.camtices[int(face[1])]
+        f := &ob.camtices[int(face[2])]
+       tri := triangle{}
+ 	    tri.create(a, b, c, d, e, f)
  	    ob.triangles = append(ob.triangles, tri)
  	}
 }
 
 func (ob *object) draw(camPos *[][]float64, cammat [][]float64, board [][]rune, texture rune) {
+    transform(cammat, ob.vertices, ob.camtices)
     for _, tri := range ob.triangles {
-        copy(tri.camtices, tri.vertices)
-        transform(cammat, tri.camtices)
         tri.draw(camPos, board, texture)
     }
 }
 
 func (ob *object) fill(camPos *[][]float64, cammat [][]float64, board [][]rune, zbuf [][]float64, texture rune) {
+    transform(cammat, ob.vertices, ob.camtices)
     for _, tri := range ob.triangles {
-        copy(tri.camtices, tri.vertices)
-        transform(cammat, tri.camtices)
         tri.fill(camPos, board, zbuf, texture)
     }
 }
 
 //multiplies the mat with coords of each triangle
 func (ob *object) transform(mat [][]float64) {
-    for _, tri := range ob.triangles {
-        transform(mat, tri.vertices)
-    }
+    transform(mat, ob.vertices)
 }

@@ -44,7 +44,6 @@
     . try: 1/(z-scrDist) and scrDist/(z+scrDist) in projectP3d
     . make a demo showing fov change with time
     . add roll to camera.go
-    . figure out what the extra cot was in projection now in transform()
     . try adding sin and stuff to the sphere coordinates
       . that coding train vid (wierd shapes from spheres)
     . add w1 to the new triangle rasterization (fill())
@@ -54,20 +53,12 @@
     
 
 . plan
-    . profiling to see whats slowing down
     . optimise (just the mesh part and not the fill)
       . doing copy() and then transform() in fill() ans stuff is inefficient
       . store all vertices in a single array to prevent copies.
         . point 7 from above
-        . either the whole world or per object. each has its benefits.
-          . for the world option, remove the transform from tri.fill() and stuff
-        . change to pointers wherever vertices are required
-        . transform should directly change the vertices (maybe)
-      /. POINT 12 from above (aint doin this)
-        /. this could make a huge difference (maybe)
-          /. or it may just improve speed by 1 frame
-        /. but will also cause glitch effects
-        . save camMat with camera
+        . try saving the normals in triangles
+    . save camMat with camera
     . new rasterisation method (similar to 1st (attempt 3)) (phone camera gallery)
       . change line() too
     . clip (triangle.fill())
