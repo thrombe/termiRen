@@ -1,12 +1,12 @@
 package main
 
 import (
+	"bufio"
 	"math"
-    "strings"
-    "strconv"
-    "bufio"
-    "os"
-    // "fmt"
+	"os"
+	"strconv"
+	"strings"
+	// "fmt"
 )
 
 // helper functions
@@ -83,7 +83,7 @@ func (cu *cuboid) create(o, u [][]float64) {
 }
 
 //draws the cuboid on canvas using camoords
-func (cu *cuboid) draw(cammat [][]float64, board [][]rune, texture rune) {
+func (cu *cuboid) draw(cammat [][]float64, board [][] byte, texture  byte) {
     transform(cammat, cu.vertices, cu.camtices)
     for i := 0; i < 4; i++ { // connecting vertices by lines
         line(cu.camtices[i], cu.camtices[(i+1)%4], board, texture)
@@ -120,7 +120,7 @@ func (tri *triangle) normal() [][]float64 {
 }
 
 //draws triangle using camtices
-func (tri *triangle) draw(camPos *[][]float64, board [][]rune, texture rune) {
+func (tri *triangle) draw(camPos *[][]float64, board [][] byte, texture  byte) {
     if vecDot(matSub(*tri.vertices[0], *camPos), tri.normal()) >= 0 {return} // if the front(anticlockwise) face of triangle faces away from/perpendicular to cam, dont draw 
     // >= cuz both vectors have different origin
 
@@ -130,7 +130,7 @@ func (tri *triangle) draw(camPos *[][]float64, board [][]rune, texture rune) {
 }
 
 //fills up triangle using camtices
-func (tri *triangle) fill(camPos *[][]float64, board [][]rune, zbuf [][]float64, texture rune) {
+func (tri *triangle) fill(camPos *[][]float64, board [][] byte, zbuf [][]float64, texture  byte) {
     if vecDot(matSub(*tri.vertices[0], *camPos), tri.normal()) >= 0 {return} // if the front(anticlockwise) face of triangle faces away from/perpendicular to cam, dont draw 
     // >= cuz both vectors have different origin
     
@@ -147,7 +147,7 @@ func (tri *triangle) fill(camPos *[][]float64, board [][]rune, zbuf [][]float64,
     textures := "':;!vx1WnOM@B"
     tex = -tex*float64(len(textures)-1)
     if tex < 0 {tex = 0}
-    texture = rune(textures[round(tex)])
+    texture =  byte(textures[round(tex)])
     
     v1 := *tri.camtices[0]
     v21 := matSub(*tri.camtices[1], v1)
@@ -209,14 +209,14 @@ func (sp *sphere) create(o [][]float64, r float64, n int) {
     }
 }
 
-func (sp *sphere) draw(camPos *[][]float64, cammat [][]float64, board [][]rune, texture rune) {
+func (sp *sphere) draw(camPos *[][]float64, cammat [][]float64, board [][] byte, texture  byte) {
     transform(cammat, sp.vertices, sp.camtices)
     for _, tri := range sp.triangles {
         tri.draw(camPos, board, texture)
     }
 }
 
-func (sp *sphere) fill(camPos *[][]float64, cammat [][]float64, board [][]rune, zbuf [][]float64, texture rune) {
+func (sp *sphere) fill(camPos *[][]float64, cammat [][]float64, board [][] byte, zbuf [][]float64, texture  byte) {
     transform(cammat, sp.vertices, sp.camtices)
     for _, tri := range sp.triangles {
         tri.fill(camPos, board, zbuf, texture)
@@ -295,14 +295,14 @@ func (ob *object) create(path string, o [][]float64) {
  	}
 }
 
-func (ob *object) draw(camPos *[][]float64, cammat [][]float64, board [][]rune, texture rune) {
+func (ob *object) draw(camPos *[][]float64, cammat [][]float64, board [][] byte, texture  byte) {
     transform(cammat, ob.vertices, ob.camtices)
     for _, tri := range ob.triangles {
         tri.draw(camPos, board, texture)
     }
 }
 
-func (ob *object) fill(camPos *[][]float64, cammat [][]float64, board [][]rune, zbuf [][]float64, texture rune) {
+func (ob *object) fill(camPos *[][]float64, cammat [][]float64, board [][] byte, zbuf [][]float64, texture  byte) {
     transform(cammat, ob.vertices, ob.camtices)
     for _, tri := range ob.triangles {
         tri.fill(camPos, board, zbuf, texture)

@@ -21,7 +21,7 @@ var rotA = 0.1 // camera rotation angular vemocity (radians)
 
 // CONTROLS - wasd to move, ijkl to turn camera, WS to move up and down, q to QUIT
 
-var blank = ' '
+var blank byte = ' '
 // var unblank = '.'
 
 func main() {
