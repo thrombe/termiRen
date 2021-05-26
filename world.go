@@ -6,8 +6,13 @@ import (
 	"os"
 	"strconv"
 	"strings"
+    "sync"
 	// "fmt"
 )
+
+func jndu() {
+    shhh(math.Pi)
+}
 
 // helper functions
 
@@ -41,15 +46,25 @@ func transform(mat [][]float64, verlists ...[][][]float64) {
         vertices = verlists[0]
         savein = verlists[0]
     }
+
+    synk := make(chan struct{}, 15)
+    var wg sync.WaitGroup
+
     length := len(vertices)
     for i := 0; i < length; i++ {
-        // savein[i] = matMul(mat, vertices[i])
-        vecMul(mat, vertices[i], savein[i])
-        if savein[i][3][0] != 1 { // if the forth column if vector isnt 1, then scale the vector
-            if round(savein[i][3][0]*1000) == 0 {panic("divide by 0 in transform()")}
-            savein[i] = matScalar(savein[i], 1/savein[i][3][0])//*math.Tan(fov/2))) // is the cot extra??????????????
-        }
+        synk <- struct{}{}
+        wg.Add(1)
+        go func(i int, synk chan struct{}, vertices, savein [][][]float64) {
+            vecMul(mat, vertices[i], savein[i])
+            if savein[i][3][0] != 1 { // if the forth column if vector isnt 1, then scale the vector
+                if round(savein[i][3][0]*1000) == 0 {panic("divide by 0 in transform()")}
+                savein[i] = matScalar(savein[i], 1/savein[i][3][0])//*math.Tan(fov/2))) // is the cot extra??????????????
+            }
+            <- synk
+            wg.Done()
+        }(i, synk, vertices, savein)
     }
+    wg.Wait()
 }
 
 // objects
@@ -129,9 +144,27 @@ func (tri *triangle) draw(camPos *[][]float64, board [][] byte, texture  byte) {
     }
 }
 
+func poi(p [][]float64, zbuf [][]float64, texture  byte, synk chan pixel, wg *sync.WaitGroup) {
+    x, y := giveInd(p[0][0], p[1][0]*charRatio)
+    if !(0 <= x && x < xlim && 0 <= y && y < ylim) {return}
+    if zbuf[y][x] < p[2][0] {
+        pix := pixel{}
+        pix.x, pix.y, pix.z, pix.texture = x, y, p[2][0], texture
+        wg.Add(1)
+        synk <- pix
+    }
+}
+
+type pixel struct{
+    x, y int
+    z float64
+    texture byte
+}
+
 //fills up triangle using camtices
-func (tri *triangle) fill(camPos *[][]float64, board [][] byte, zbuf [][]float64, texture  byte) {
-    if vecDot(matSub(*tri.vertices[0], *camPos), tri.normal()) >= 0 {return} // if the front(anticlockwise) face of triangle faces away from/perpendicular to cam, dont draw 
+func (tri *triangle) fill(camPos *[][]float64, zbuf [][]float64, synk chan pixel, wg *sync.WaitGroup) {
+    normal := tri.normal()
+    if vecDot(matSub(*tri.vertices[0], *camPos), normal) >= 0 {return} // if the front(anticlockwise) face of triangle faces away from/perpendicular to cam, dont draw 
     // >= cuz both vectors have different origin
     
     i := 0
@@ -142,12 +175,12 @@ func (tri *triangle) fill(camPos *[][]float64, board [][] byte, zbuf [][]float64
     
     lightDir := matSub(*tri.vertices[0], *camPos)
     // lightDir := [][]float64 {{-1}, {-1}, {-2}, {0}} // from +z to -z
-    tex := vecDot(vecUnit(lightDir), vecUnit(tri.normal())) // 0 to 1
+    tex := vecDot(vecUnit(lightDir), vecUnit(normal)) // 0 to 1
     // textures := ".`^,:;Il!i~+_-?][}{!)(|/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao*#MW&8%B@$"
     textures := "':;!vx1WnOM@B"
     tex = -tex*float64(len(textures)-1)
     if tex < 0 {tex = 0}
-    texture =  byte(textures[round(tex)])
+    texture :=  byte(textures[round(tex)])
     
     v1 := *tri.camtices[0]
     v21 := matSub(*tri.camtices[1], v1)
@@ -156,13 +189,84 @@ func (tri *triangle) fill(camPos *[][]float64, board [][] byte, zbuf [][]float64
     for w2 := 1.0; w2 >= 0; w2 -= dw2 {
         for w3 := 0.0; w3 <= 1-w2; w3 += dw3 {
             poin := nMatAdd(v1, matScalar(v21, w2), matScalar(v31, w3))
-            point3d(poin, board, zbuf, texture)
+            poi(poin, zbuf, texture, synk, wg)
         }
-        poin := nMatAdd(v1, matScalar(v21, w2), matScalar(v31, 1-w2)) // just to make sure there are no holes (works pretty well)
-        point3d(poin, board, zbuf, texture)
+        poin := nMatAdd(v1, matScalar(v21, w2), matScalar(v31, 1-w2)) // just to make sure there are no holes
+        poi(poin, zbuf, texture, synk, wg)
     }
-}
 
+    // vertices := make([][][]float64, 3)
+    // vertices[0], vertices[1], vertices[2] = *tri.camtices[0], *tri.camtices[1], *tri.camtices[2]
+    // if vertices[0][0][0] > vertices[1][0][0] {vertices[0], vertices[1] = vertices[1], vertices[0]} // arrange coords in ascending order (x)
+    // if vertices[0][0][0] > vertices[2][0][0] {vertices[0], vertices[2] = vertices[2], vertices[0]}
+    // if vertices[1][0][0] > vertices[2][0][0] {vertices[1], vertices[2] = vertices[2], vertices[1]}
+    
+    // x0, x1, x2, plus := round(vertices[0][0][0]), round(vertices[1][0][0]), round(vertices[2][0][0]), 0
+    // var dv10, dv21, l1, l2, l3 [][]float64
+    // if vertices[1][1][0] > vertices[0][1][0] {plus = -1} else {plus = 1}
+    // if x0 != x1 {
+    //     v10 := matSub(vertices[1], vertices[0])
+    //     dv10 = matScalar(v10, 1/v10[0][0])
+    //     l1 = vertices[0]
+    // }
+    // v20 := matSub(vertices[2], vertices[0])
+    // dv20 := matScalar(v20, 1/v20[0][0])
+    // l2 = vertices[0]
+    // if x1 != x2 {
+    //     v21 := matSub(vertices[1], vertices[0])
+    //     dv21 = matScalar(v21, 1/v21[0][0])
+    //     l3 = vertices[1]
+    // }
+    // for x := x0; x < x1; x++ {
+    //     l1, l2 = matAdd(l1, dv10), matAdd(l2, dv20)
+    //     z := l1[2][0]
+    //     y0, y1 := round(l1[1][0]*charRatio), round(l2[1][0]*charRatio)
+    //     if y0 == y1 {
+    //         xb, yb := x+xlim/2, -y0+ylim/2
+    //         if !(0 <= xb && xb < xlim && 0 <= yb && yb < ylim) {continue}
+    //         if zbuf[y0][x] < z {
+    //             zbuf[y0][x] = z
+    //             board[y0][x] = texture
+    //         }            
+    //         continue
+    //     }
+    //     dz := (l2[2][0] - z)/(float64(y1-y0))
+    //     for y := y0; y < y1; y += plus {
+    //         xb, yb := x+xlim/2, -y+ylim/2
+    //         if !(0 <= xb && xb < xlim && 0 <= yb && yb < ylim) {continue}
+    //         if zbuf[y][x] < z {
+    //             zbuf[y][x] = z
+    //             board[y][x] = texture
+    //         }            
+    //         z += dz
+    //     }
+    // }
+    // for x := x0; x < x1; x++ {
+    //     l3, l2 = matAdd(l3, dv21), matAdd(l2, dv21)
+    //     z := l3[2][0]
+    //     y0, y1 := round(l3[1][0]*charRatio), round(l2[1][0]*charRatio)
+    //     if y0 == y1 {
+    //         xb, yb := x+xlim/2, -y0+ylim/2
+    //         if !(0 <= xb && xb < xlim && 0 <= yb && yb < ylim) {continue}
+    //         if zbuf[y0][x] < z {
+    //             zbuf[y0][x] = z
+    //             board[y0][x] = texture
+    //         }            
+    //         continue
+    //     }
+    //     dz := (l2[2][0] - z)/(float64(y1-y0))
+    //     for y := y0; y < y1; y += plus {
+    //         xb, yb := x+xlim/2, -y+ylim/2
+    //         if !(0 <= xb && xb < xlim && 0 <= yb && yb < ylim) {continue}
+    //         if zbuf[y][x] < z {
+    //             zbuf[y][x] = z
+    //             board[y][x] = texture
+    //         }            
+    //         z += dz
+    //     }
+    // }
+}
+/*
 type sphere struct {
     vertices [][][]float64
     camtices [][][]float64
@@ -227,7 +331,7 @@ func (sp *sphere) fill(camPos *[][]float64, cammat [][]float64, board [][] byte,
 func (sp *sphere) transform(mat [][]float64) {
     transform(mat, sp.vertices)
 }
-
+*/
 type object struct {
     vertices [][][]float64
     camtices [][][]float64
@@ -302,11 +406,34 @@ func (ob *object) draw(camPos *[][]float64, cammat [][]float64, board [][] byte,
     }
 }
 
-func (ob *object) fill(camPos *[][]float64, cammat [][]float64, board [][] byte, zbuf [][]float64, texture  byte) {
+func (ob *object) fill(camPos *[][]float64, cammat [][]float64, board [][] byte, zbuf [][]float64, work chan struct{}) {
     transform(cammat, ob.vertices, ob.camtices)
+    qit := make(chan struct{})
+    synk := make(chan pixel, 50) // here
+    var wg sync.WaitGroup // to track the progress of pixels
+    go func(synk chan pixel, qit chan struct{}) {
+        var pix pixel
+        for {
+            select {
+            case <- qit: return
+            case pix = <- synk:
+            }
+            if zbuf[pix.y][pix.x] < pix.z {
+                zbuf[pix.y][pix.x] = pix.z
+                board[pix.y][pix.x] = pix.texture
+            }
+            wg.Done()
+        }
+    }(synk, qit)
     for _, tri := range ob.triangles {
-        tri.fill(camPos, board, zbuf, texture)
+        work <- struct{}{}
+        go func (tri triangle) { ///////// ********** BUGGGG ALERTTTTTTT - go tri.fill() dosent work. it has to be done like this
+            tri.fill(camPos, zbuf, synk, &wg)
+            <- work
+        }(tri)
     }
+    wg.Wait() // dont close till sync is empty
+    close(qit)
 }
 
 //multiplies the mat with coords of each triangle

@@ -8,6 +8,13 @@ import (
 	// "github.com/pkg/profile"
 )
 
+func shhh(vals ...interface{}) {
+    _ = time.Now()
+    for _, val := range vals {
+        _ = val
+    }
+}
+
 // REMEMBER TO USE POINTERS and fix printB()
 // KEEP Z COORD -ve (camera is facing -z)
 const xlim = 151
@@ -51,6 +58,8 @@ func demo8() { // load obj files
 	camPos, camDir := camInit()
 	go detectKey(&camPos, &camDir, win, matchan, quitchan)
 	camMat := matMul(projectionMat(), transMat(camPos)) // default value
+	
+	work := make(chan struct{}, 10)
 
 	loop: for { // press q to quit
 		select {
@@ -62,12 +71,12 @@ func demo8() { // load obj files
 
 		// obj.draw(&camPos, camMat, board, '.')
 		// time.Sleep(time.Millisecond*50)
-		obj.fill(&camPos, camMat, board, zbuf, '#')
+		obj.fill(&camPos, camMat, board, zbuf, work)
 		printy()
 	}
 }
 
-
+/*
 func demo7() { // sphere with n*n triangles
 	o := [][]float64 {{0}, {0}, {-30}, {1}}
 	// axis := [][]float64 {{1}, {1}, {-1}, {0}}
@@ -129,4 +138,4 @@ func demo5() { // rotating cube 3d with a cam
 		printy()
 		time.Sleep(time.Millisecond*50)
 	}
-}
+}*/

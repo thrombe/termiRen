@@ -75,13 +75,15 @@ func point(h, k float64, board [][] byte, texture  byte) {
 }
 
 //draws a 3d point on canvas using zbuf
-func point3d(p [][]float64, board [][] byte, zbuf [][]float64, texture  byte) {
+func point3d(p [][]float64, board [][] byte, zbuf [][]float64, texture  byte, sync chan int) {
     x, y := giveInd(p[0][0], p[1][0]*charRatio)
     if !(0 <= x && x < xlim && 0 <= y && y < ylim) {return}
+    sync <- 1
     if zbuf[y][x] < p[2][0] {
         zbuf[y][x] = p[2][0]
         board[y][x] = texture
     }
+    <- sync
 }
 
 //draw line on canvas

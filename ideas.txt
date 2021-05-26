@@ -57,6 +57,8 @@
       . find the bounding box and then the centre
       . save it in object.o ? or something
     . optimise (just the mesh part and not the fill)
+      . grab line() from the other copy of termiRen
+        . point() and giveIndex() might not really need float64
       /. a := []byte("shshh") fmt.Printf("%s", a).
         /. this works but not sure if faster
           /. potentially faster to convert byte slice to string
@@ -66,11 +68,24 @@
       /. make a vecMult function that multiplies matrix to a vector, but hard code the expanded from
         doing this enables to directly store the transformed vertices in vertices[][][]float and not have to make a copy
         . similarly make other functions used in tri.fill (and other functions in main loop) more efficient
+      . try saving the normals in triangles
+      . making this multi-threaded
+        . if the naieve method dosent work, then try the following stuff
+          . naieve method - multiple go-routines rasterising different triangles
+          . but what if 2 go-routines try to access same pixel at same time?
+          . what if race conditions?
+          . maybe try semaphore
+        . 15 or something worker go routines
+        . 1 additional go-routine that puts pixel structure in a channel
+        . printy() takes in a channel with the pixel structure that the workers submit
+          and checks zbuffer and sets pixels and then prints
       . store all vertices in a single array to prevent copies.
         . point 7 from above
-        . try saving the normals in triangles
+      . try converting vertices to structs instead of [][]
+        . just to see if this is more efficient. idk really what to expect. but cpp code uses class for these
     . save camMat with camera
     . new rasterisation method (similar to 1st (attempt 3)) (phone camera gallery)
+      . seems VERY complicated cuz of giveIndex, charRatio, zbuffer
       . change line() too
     . clip (triangle.fill())
       . the parts of triangles outside the screen limit
