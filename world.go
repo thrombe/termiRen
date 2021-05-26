@@ -47,24 +47,36 @@ func transform(mat [][]float64, verlists ...[][][]float64) {
         savein = verlists[0]
     }
 
-    synk := make(chan struct{}, 15)
+    synk := make(chan int, 30)
+    qit := make(chan struct{})
     var wg sync.WaitGroup
 
-    length := len(vertices)
-    for i := 0; i < length; i++ {
-        synk <- struct{}{}
-        wg.Add(1)
-        go func(i int, synk chan struct{}, vertices, savein [][][]float64) {
-            vecMul(mat, vertices[i], savein[i])
-            if savein[i][3][0] != 1 { // if the forth column if vector isnt 1, then scale the vector
-                if round(savein[i][3][0]*1000) == 0 {panic("divide by 0 in transform()")}
-                savein[i] = matScalar(savein[i], 1/savein[i][3][0])//*math.Tan(fov/2))) // is the cot extra??????????????
+    for j := 0; j < 15; j++ {
+        go func(synk chan int, qit chan struct{}) {
+            var i int
+            for {
+                select{
+                case <-qit: return
+                case i = <- synk:
+                }
+                vecMul(mat, vertices[i], savein[i])
+                if savein[i][3][0] != 1 { // if the forth column if vector isnt 1, then scale the vector
+                    if round(savein[i][3][0]*1000) == 0 {panic("divide by 0 in transform()")}
+                    savein[i] = matScalar(savein[i], 1/savein[i][3][0])//*math.Tan(fov/2))) // is the cot extra??????????????
+                }
+                wg.Done()
             }
-            <- synk
-            wg.Done()
-        }(i, synk, vertices, savein)
+        }(synk, qit)
+    }
+
+    length := len(vertices)
+    wg.Add(length)
+    for i := 0; i < length; i++ {
+        synk <- i
+        // wg.Add(1)
     }
     wg.Wait()
+    close(qit)
 }
 
 // objects
@@ -162,7 +174,7 @@ type pixel struct{
 }
 
 //fills up triangle using camtices
-func (tri *triangle) fill(camPos *[][]float64, zbuf [][]float64, synk chan pixel, wg *sync.WaitGroup) {
+func (tri *triangle) fill(camPos *[][]float64, board [][]byte, zbuf [][]float64) {
     normal := tri.normal()
     if vecDot(matSub(*tri.vertices[0], *camPos), normal) >= 0 {return} // if the front(anticlockwise) face of triangle faces away from/perpendicular to cam, dont draw 
     // >= cuz both vectors have different origin
@@ -186,14 +198,16 @@ func (tri *triangle) fill(camPos *[][]float64, zbuf [][]float64, synk chan pixel
     v21 := matSub(*tri.camtices[1], v1)
     v31 := matSub(*tri.camtices[2], v1)
     dw2, dw3 := 1.0/vecSize(v21), 1.0/vecSize(v31)
+    // synk <- struct{}{}
     for w2 := 1.0; w2 >= 0; w2 -= dw2 {
         for w3 := 0.0; w3 <= 1-w2; w3 += dw3 {
             poin := nMatAdd(v1, matScalar(v21, w2), matScalar(v31, w3))
-            poi(poin, zbuf, texture, synk, wg)
+            point3d(poin, board, zbuf, texture)//, synk)
         }
         poin := nMatAdd(v1, matScalar(v21, w2), matScalar(v31, 1-w2)) // just to make sure there are no holes
-        poi(poin, zbuf, texture, synk, wg)
+        point3d(poin, board, zbuf, texture)//, synk)
     }
+    // <- synk
 
     // vertices := make([][][]float64, 3)
     // vertices[0], vertices[1], vertices[2] = *tri.camtices[0], *tri.camtices[1], *tri.camtices[2]
@@ -406,31 +420,50 @@ func (ob *object) draw(camPos *[][]float64, cammat [][]float64, board [][] byte,
     }
 }
 
-func (ob *object) fill(camPos *[][]float64, cammat [][]float64, board [][] byte, zbuf [][]float64, work chan struct{}) {
+func (ob *object) fill(camPos *[][]float64, cammat [][]float64, board [][] byte, zbuf [][]float64) {
     transform(cammat, ob.vertices, ob.camtices)
-    qit := make(chan struct{})
-    synk := make(chan pixel, 50) // here
+    // qit := make(chan struct{})
     var wg sync.WaitGroup // to track the progress of pixels
-    go func(synk chan pixel, qit chan struct{}) {
-        var pix pixel
-        for {
-            select {
-            case <- qit: return
-            case pix = <- synk:
+    // go func(synk chan pixel, qit chan struct{}) {
+    //     var pix pixel
+    //     for {
+    //         select {
+    //         case <- qit: return
+    //         case pix = <- synk:
+    //         }
+    //         if zbuf[pix.y][pix.x] < pix.z {
+    //             zbuf[pix.y][pix.x] = pix.z
+    //             board[pix.y][pix.x] = pix.texture
+    //         }
+    //         wg.Done()
+    //     }
+    // }(synk, qit)
+
+    qit := make(chan struct{})
+    work := make(chan triangle, 30)
+    for i := 0; i < 10; i++ {
+        go func(work chan triangle, qit chan struct{}) {
+            for {
+                var tri triangle
+                select {
+                case <- qit: return
+                case tri = <- work:
+                }
+                tri.fill(camPos, board, zbuf)
+                wg.Done()
             }
-            if zbuf[pix.y][pix.x] < pix.z {
-                zbuf[pix.y][pix.x] = pix.z
-                board[pix.y][pix.x] = pix.texture
-            }
-            wg.Done()
-        }
-    }(synk, qit)
+        }(work, qit)
+    }
+
     for _, tri := range ob.triangles {
-        work <- struct{}{}
-        go func (tri triangle) { ///////// ********** BUGGGG ALERTTTTTTT - go tri.fill() dosent work. it has to be done like this
-            tri.fill(camPos, zbuf, synk, &wg)
-            <- work
-        }(tri)
+        // work <- struct{}{}
+        wg.Add(1)
+        work <- tri
+        // go func (tri triangle) { ///////// ********** BUGGGG ALERTTTTTTT - go tri.fill() dosent work. it has to be done like this
+        //     tri.fill(camPos, board, zbuf)
+        //     <- work
+        //     wg.Done()
+        // }(tri)
     }
     wg.Wait() // dont close till sync is empty
     close(qit)

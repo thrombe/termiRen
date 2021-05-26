@@ -70,6 +70,7 @@
         . similarly make other functions used in tri.fill (and other functions in main loop) more efficient
       . try saving the normals in triangles
       . making this multi-threaded
+        . try creating less go routines. ie create once and use multiple times
         . if the naieve method dosent work, then try the following stuff
           . naieve method - multiple go-routines rasterising different triangles
           . but what if 2 go-routines try to access same pixel at same time?

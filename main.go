@@ -45,7 +45,7 @@ func demo8() { // load obj files
 	rot := rotMat3dy(0.0)
 	rot = rotAboutPoint(rot, o)
 	obj := object{}
-	obj.create("./objects/teapot.obj", o) // 47.2k triangles 23.36k vertices in big chungus
+	obj.create("./objects/dragon2.obj", o) // 47.2k triangles 23.36k vertices in big chungus
 	rawboard, board, zbuf := genB()
 	win, printy:= perint(rawboard, board, zbuf)
 
@@ -59,8 +59,6 @@ func demo8() { // load obj files
 	go detectKey(&camPos, &camDir, win, matchan, quitchan)
 	camMat := matMul(projectionMat(), transMat(camPos)) // default value
 	
-	work := make(chan struct{}, 10)
-
 	loop: for { // press q to quit
 		select {
 		case camMat = <- matchan:
@@ -71,7 +69,7 @@ func demo8() { // load obj files
 
 		// obj.draw(&camPos, camMat, board, '.')
 		// time.Sleep(time.Millisecond*50)
-		obj.fill(&camPos, camMat, board, zbuf, work)
+		obj.fill(&camPos, camMat, board, zbuf)
 		printy()
 	}
 }
