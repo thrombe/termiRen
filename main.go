@@ -8,21 +8,16 @@ import (
 	// "github.com/pkg/profile"
 )
 
-// REMEMBER TO USE POINTERS and fix printB()
-// KEEP Z COORD -ve (camera is facing -z)
 const xlim = 151
 const ylim = 163
-var fov = math.Pi/2.5 //*horizontal // keep this between 0 and pi
-var charRatio = 1.4/2.55 // used only in point() // width/height of a character
+const fov = math.Pi/2.5 //*horizontal // keep this between 0 and pi
+const charRatio = 1.4/2.55 // used only in point() // width/height of a character
 const ncursed = 1 // print using ncurses if 1 else just fmt.print
 
-var tranV = 4.0 // camera movement velocity (metres?)
-var rotA = 0.1 // camera rotation angular vemocity (radians)
+const tranV = 4.0 // camera movement velocity (metres?)
+const rotA = 0.1 // camera rotation angular vemocity (radians)
 
 // CONTROLS - wasd to move, ijkl to turn camera, WS to move up and down, q to QUIT
-
-var blank byte = ' '
-// var unblank = '.'
 
 func main() {
 	// defer profile.Start(profile.MemProfile).Stop()

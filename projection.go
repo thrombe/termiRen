@@ -18,7 +18,7 @@ func perint(rawboard [] byte, board [][] byte, zbuf [][]float64) (*ncurses.Windo
             win.Refresh()
             for y := 0; y < ylim; y++ { // clear board and zbuf
                 for x := 0; x < xlim; x++ {
-                    board[y][x] = blank
+                    board[y][x] = ' '
                     zbuf[y][x] = -2 // -1 should be the clip limit (1000 i think, as defined in projection matrix)
                 }
             }
@@ -28,7 +28,7 @@ func perint(rawboard [] byte, board [][] byte, zbuf [][]float64) (*ncurses.Windo
             fmt.Println(string(rawboard))
             for y := 0; y < ylim; y++ {
                 for x := 0; x < xlim; x++ {
-                    board[y][x] = blank
+                    board[y][x] = ' '
                     zbuf[y][x] = -2
                 }
             }
