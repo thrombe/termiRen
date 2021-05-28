@@ -200,6 +200,15 @@ func round(i float64) int {
     //llim := int(i)
     //if i-float64(llim) >= 0.5 {return llim+1} else {return llim}
 }
+
+// returns a 2 by 2 rotation matrix
+func rotMat(theta float64) [][]float64 {
+    return matrix(2, 2,
+        math.Cos(theta), -math.Sin(theta),
+        math.Sin(theta), math.Cos(theta),
+        )
+}
+
 /*
 //returns a func that returns if a point lies in a triangle (2d)
 func inTriangle(vertices [][][]float64) func([][]float64) bool {
