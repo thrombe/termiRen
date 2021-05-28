@@ -194,77 +194,6 @@ func (tri *triangle) fill(camPos *[][]float64, zbuf [][]float64, synk chan pixel
         poin := nMatAdd(v1, matScalar(v21, w2), matScalar(v31, 1-w2)) // just to make sure there are no holes
         poi(poin, zbuf, texture, synk, wg)
     }
-
-    // vertices := make([][][]float64, 3)
-    // vertices[0], vertices[1], vertices[2] = *tri.camtices[0], *tri.camtices[1], *tri.camtices[2]
-    // if vertices[0][0][0] > vertices[1][0][0] {vertices[0], vertices[1] = vertices[1], vertices[0]} // arrange coords in ascending order (x)
-    // if vertices[0][0][0] > vertices[2][0][0] {vertices[0], vertices[2] = vertices[2], vertices[0]}
-    // if vertices[1][0][0] > vertices[2][0][0] {vertices[1], vertices[2] = vertices[2], vertices[1]}
-    
-    // x0, x1, x2, plus := round(vertices[0][0][0]), round(vertices[1][0][0]), round(vertices[2][0][0]), 0
-    // var dv10, dv21, l1, l2, l3 [][]float64
-    // if vertices[1][1][0] > vertices[0][1][0] {plus = -1} else {plus = 1}
-    // if x0 != x1 {
-    //     v10 := matSub(vertices[1], vertices[0])
-    //     dv10 = matScalar(v10, 1/v10[0][0])
-    //     l1 = vertices[0]
-    // }
-    // v20 := matSub(vertices[2], vertices[0])
-    // dv20 := matScalar(v20, 1/v20[0][0])
-    // l2 = vertices[0]
-    // if x1 != x2 {
-    //     v21 := matSub(vertices[1], vertices[0])
-    //     dv21 = matScalar(v21, 1/v21[0][0])
-    //     l3 = vertices[1]
-    // }
-    // for x := x0; x < x1; x++ {
-    //     l1, l2 = matAdd(l1, dv10), matAdd(l2, dv20)
-    //     z := l1[2][0]
-    //     y0, y1 := round(l1[1][0]*charRatio), round(l2[1][0]*charRatio)
-    //     if y0 == y1 {
-    //         xb, yb := x+xlim/2, -y0+ylim/2
-    //         if !(0 <= xb && xb < xlim && 0 <= yb && yb < ylim) {continue}
-    //         if zbuf[y0][x] < z {
-    //             zbuf[y0][x] = z
-    //             board[y0][x] = texture
-    //         }            
-    //         continue
-    //     }
-    //     dz := (l2[2][0] - z)/(float64(y1-y0))
-    //     for y := y0; y < y1; y += plus {
-    //         xb, yb := x+xlim/2, -y+ylim/2
-    //         if !(0 <= xb && xb < xlim && 0 <= yb && yb < ylim) {continue}
-    //         if zbuf[y][x] < z {
-    //             zbuf[y][x] = z
-    //             board[y][x] = texture
-    //         }            
-    //         z += dz
-    //     }
-    // }
-    // for x := x0; x < x1; x++ {
-    //     l3, l2 = matAdd(l3, dv21), matAdd(l2, dv21)
-    //     z := l3[2][0]
-    //     y0, y1 := round(l3[1][0]*charRatio), round(l2[1][0]*charRatio)
-    //     if y0 == y1 {
-    //         xb, yb := x+xlim/2, -y0+ylim/2
-    //         if !(0 <= xb && xb < xlim && 0 <= yb && yb < ylim) {continue}
-    //         if zbuf[y0][x] < z {
-    //             zbuf[y0][x] = z
-    //             board[y0][x] = texture
-    //         }            
-    //         continue
-    //     }
-    //     dz := (l2[2][0] - z)/(float64(y1-y0))
-    //     for y := y0; y < y1; y += plus {
-    //         xb, yb := x+xlim/2, -y+ylim/2
-    //         if !(0 <= xb && xb < xlim && 0 <= yb && yb < ylim) {continue}
-    //         if zbuf[y][x] < z {
-    //             zbuf[y][x] = z
-    //             board[y][x] = texture
-    //         }            
-    //         z += dz
-    //     }
-    // }
 }
 /*
 type sphere struct {
@@ -406,7 +335,7 @@ func (ob *object) draw(camPos *[][]float64, cammat [][]float64, board [][] byte,
     }
 }
 
-func (ob *object) fill(camPos *[][]float64, cammat [][]float64, board [][] byte, zbuf [][]float64, work chan struct{}) {
+func (ob *object) fill(camPos *[][]float64, cammat [][]float64, board [][] byte, zbuf [][]float64) {
     transform(cammat, ob.vertices, ob.camtices)
     qit := make(chan struct{})
     synk := make(chan pixel, 50) // here
@@ -425,9 +354,10 @@ func (ob *object) fill(camPos *[][]float64, cammat [][]float64, board [][] byte,
             wg.Done()
         }
     }(synk, qit)
+    work := make(chan struct{}, 10)
     for _, tri := range ob.triangles {
         work <- struct{}{}
-        go func (tri triangle) { ///////// ********** BUGGGG ALERTTTTTTT - go tri.fill() dosent work. it has to be done like this
+        go func (tri triangle) { // go tri.fill() dosent work. it has to be done like this
             tri.fill(camPos, zbuf, synk, &wg)
             <- work
         }(tri)
