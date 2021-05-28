@@ -2,7 +2,7 @@ package main
 
 import (
     "fmt"
-    "math"
+    // "math"
     "seehuhn.de/go/ncurses"
     )
 
@@ -86,16 +86,20 @@ func point3d(p [][]float64, board [][] byte, zbuf [][]float64, texture  byte) {
 
 //draw line on canvas
 func line(v1, v2 [][]float64, board [][] byte, texture  byte) {
-    x1, y1, x2, y2 := v1[0][0], v1[1][0], v2[0][0], v2[1][0]
-    length := math.Sqrt((x2-x1)*(x2-x1) + (y2-y1)*(y2-y1))
-    if round(length) == 0 { // if line is too small, just draw a point
-        point(x1, y1, board, texture)
-        return
-    }
-    ux, uy := (x2-x1)/length, (y2-y1)/length
-    for math.Round(2*((x2-x1)*(x2-x1)+(y2-y1)*(y2-y1))) != 0 { // that 2 there is for resolution of line
-        point(x1, y1, board, texture)
-        x1, y1 = x1+ux, y1+uy
+    x, y, x2, y2 := round(v1[0][0]), round(v1[1][0]), round(v2[0][0]), round(v2[1][0])
+    var steepx, steepy, ydir int
+    if absVal(float64(x2-x)) > absVal(float64(y2-y)) {steepx, steepy = 1, 0} else {steepx, steepy, x, x2, y, y2 = 0, 1, y, y2, x, x2} // if slope > 1
+    if x > x2 {x, x2, y, y2 = x2, x, y2, y} // x2 to the right of x
+    dx, dydy := x2-x, (y2-y)*2 // we only need 2*dy
+    if dydy > 0 {ydir = 1} else {ydir, dydy = -1, -dydy} // we only need magnitude of dy. ydir is slope > 0 or slope < 0
+    eror := 0
+    for ; x <= x2; x++ {
+        point(float64(x*steepx+y*steepy), float64(y*steepx+x*steepy), board, texture)
+        eror += dydy // similar to err += dy/dx and then checking if err > .5, if yes err -= 1 (hint- multiplying by 2*dx eliminates need of floats)
+        if eror > dx {
+            y += ydir
+            eror -= 2*dx
+        }
     }
 }
 
