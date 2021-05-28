@@ -76,7 +76,8 @@
             . what if race conditions?
             . maybe try semaphore
         . branch concurrency1. this seems just as fast as normal stuff
-          . 15 or something worker go routines
+          . the few goroutines + work from channels makes it slower idk why
+          . 15 or something worker go routines (necessary for pixels if we want safety)
           . 1 additional go-routine that puts pixel structure in a channel
           . printy() takes in a channel with the pixel structure that the workers submit
             and checks zbuffer and sets pixels and then prints
