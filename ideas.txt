@@ -56,6 +56,29 @@
     . find centres of imported objects
       . find the bounding box and then the centre
       . save it in object.o ? or something
+    . eliminate global stuff and see performance change
+      . a lot of global constants are used in heavy loops
+      . store in camera{} or something
+    . clip for z == 0
+      . M1) while changing camtices or something, if z > -1 then change the triangle 
+        such that it faces away from cam. and calc for that is easy. so it gets
+        yeeted as easily as possible while drawing
+        . this would be terrible for long triangles with 1 vertex behind limit
+        . how to determine if triangle z > -1 (3 verrices) even 1 ÷0 worls fail
+      . M2) will need to create more triangles if this happens. but then object [][][]vertices would suck
+        . maybe a seperate slice for that?
+        . so just interpolate the intersection point of edges of triangle and make new triangles
+      . rest of the clips are kinda already there
+        . no triangles facing away from cam
+        . no triangles if all vertices outside screen
+          . maybe improve this
+        . far away triangles are cliped due to zbuffer = -2 or whatever
+    . try pre-calculated normals
+      . let normals always originate from vertices[0]. so normals would just be points in space
+        . this makes finding normals into a matSub and having to maintain the normal points (from the above point)
+      . need to recalculate every time the object moves on world space
+    . eliminate transform() if rot is just identity matrx
+      . might help squeez some performance
     . optimise (just the mesh part and not the fill)
       /. a := []byte("shshh") fmt.Printf("%s", a).
         /. this works but not sure if faster
@@ -66,7 +89,6 @@
       /. make a vecMult function that multiplies matrix to a vector, but hard code the expanded from
         doing this enables to directly store the transformed vertices in vertices[][][]float and not have to make a copy
         . similarly make other functions used in tri.fill (and other functions in main loop) more efficient
-      . try saving the normals in triangles
       . making this multi-threaded
         . try creating less go routines. ie create once and use multiple times
         . if the naieve method dosent work, then try the following stuff
@@ -88,10 +110,6 @@
     . save camMat with camera
     . new rasterisation method (similar to 1st (attempt 4)) (phone camera gallery)
       . seems VERY complicated cuz of giveIndex, charRatio, zbuffer
-    . clip (triangle.fill())
-      . the parts of triangles outside the screen limit
-      . clip in z
-        . -0.001 to -1 (idk lower(towards 0) limit)
     . add the wait delay in parallel somehow
 
 . bugs
