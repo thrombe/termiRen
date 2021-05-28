@@ -87,11 +87,11 @@ func point3d(p [][]float64, board [][] byte, zbuf [][]float64, texture  byte) {
 //draw line on canvas
 func line(v1, v2 [][]float64, board [][] byte, texture  byte) {
     x, y, x2, y2 := round(v1[0][0]), round(v1[1][0]), round(v2[0][0]), round(v2[1][0])
-    if x > x2 {x, x2, y, y2 = x2, x, y2, y}
     var steepx, steepy, ydir int
-    if x2-x > y2-y {steepx, steepy = 1, 0} else {steepx, steepy, x, x2, y, y2 = 0, 1, y, y2, x, x2}
-    dx, dydy := x2-x, (y2-y)*2
-    if dydy > 0 {ydir = 1} else {ydir, dydy = -1, -dydy}
+    if absVal(float64(x2-x)) > absVal(float64(y2-y)) {steepx, steepy = 1, 0} else {steepx, steepy, x, x2, y, y2 = 0, 1, y, y2, x, x2} // if slope > 1
+    if x > x2 {x, x2, y, y2 = x2, x, y2, y} // x2 to the right of x
+    dx, dydy := x2-x, (y2-y)*2 // we only need 2*dy
+    if dydy > 0 {ydir = 1} else {ydir, dydy = -1, -dydy} // we only need magnitude of dy. ydir is slope > 0 or slope < 0
     eror := 0
     for ; x <= x2; x++ {
         point(float64(x*steepx+y*steepy), float64(y*steepx+x*steepy), board, texture)
