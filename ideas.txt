@@ -79,6 +79,9 @@
       . need to recalculate every time the object moves on world space
     . eliminate transform() if rot is just identity matrx
       . might help squeez some performance
+    . convert sphere and cuboid into objects
+      . change cuboid to use triangles
+      . make torus
     . optimise (just the mesh part and not the fill)
       /. a := []byte("shshh") fmt.Printf("%s", a).
         /. this works but not sure if faster

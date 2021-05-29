@@ -232,6 +232,7 @@ type object struct {
     vertices [][][]float64
     camtices [][][]float64
     triangles []triangle
+    center [][]float64
 }
 
 func (ob *object) create(path string, o [][]float64) {
@@ -241,6 +242,7 @@ func (ob *object) create(path string, o [][]float64) {
 
 	sc := bufio.NewScanner(file) // parsing file
 	var faces [][]float64
+    var bboxmin, bboxmax [][]float64
 	for sc.Scan() {
 		text := sc.Text()
         if len(text) == 0 {continue}
@@ -258,6 +260,13 @@ func (ob *object) create(path string, o [][]float64) {
 			vertex[3][0] = 1 // if 0 has a 1 in 4th col, it could cause probs
 			ob.vertices = append(ob.vertices, vertex)
             ob.camtices = append(ob.camtices, vector(vertex[0][0], vertex[1][0], vertex[2][0], vertex[3][0]))
+            if bboxmin == nil {bboxmin, bboxmax = vector(vertex[0][0], vertex[1][0], vertex[2][0], vertex[3][0]), vector(vertex[0][0], vertex[1][0], vertex[2][0], vertex[3][0])}
+            if bboxmin[0][0] > vertex[0][0] {bboxmin[0][0] = vertex[0][0]}
+            if bboxmin[1][0] > vertex[1][0] {bboxmin[1][0] = vertex[1][0]}
+            if bboxmin[2][0] > vertex[2][0] {bboxmin[2][0] = vertex[2][0]}
+            if bboxmax[0][0] < vertex[0][0] {bboxmax[0][0] = vertex[0][0]}
+            if bboxmax[1][0] < vertex[1][0] {bboxmax[1][0] = vertex[1][0]}
+            if bboxmax[2][0] < vertex[2][0] {bboxmax[2][0] = vertex[2][0]}
 		case "f ":
 			texx := strings.Split(text[2:], " ")
 			face := make([]float64, 3)
@@ -271,17 +280,8 @@ func (ob *object) create(path string, o [][]float64) {
 		}
  	}
 
-    // // finding the centre of a object
-    // i := 0
-    // cen := vector(0, 0, 0, 0)
-    // for _, vertex := range vertices {
-    //     i++
-    //     cen = matAdd(cen, vertex)
-    // }
-    // cen = matScalar(cen, 1/float64(i))
-    // fmt.Println(cen)
-    // //
- 	
+    ob.center = matScalar(matAdd(bboxmin, bboxmax), 0.5)
+
  	for _, face := range faces { // creating triangles
         a := &ob.vertices[int(face[0])]
         b := &ob.vertices[int(face[1])]
