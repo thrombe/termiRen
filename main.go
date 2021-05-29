@@ -23,7 +23,7 @@ func main() {
 	// defer profile.Start(profile.MemProfile).Stop()
 	// defer profile.Start().Stop()
     if ncursed == 1 {defer ncurses.EndWin()}
-    demo8()
+    demo5()
 }
 
 func demo8() { // load obj files
@@ -70,8 +70,8 @@ func demo7() { // sphere with n*n triangles
 	// rot := rotAboutVec(0.2, axis)
 	rot := rotMat3dy(0.0)
 	rot = rotAboutPoint(rot, o)
-	sp := sphere{}
-	sp.create(o, 5, 200) // performance goal(for now)(without multicore) - should be smooth for 200 at just the draw
+	sp := sphere(o, 5, 200)
+	// sp.create // performance goal(for now)(without multicore) - should be smooth for 200 at just the draw
 	rawboard, board, zbuf := genB()
 	win, printy:= perint(rawboard, board, zbuf)
 
@@ -96,15 +96,15 @@ func demo7() { // sphere with n*n triangles
 	}
 }
 
-func demo5() { // rotating cube 3d with a cam $$BROKEN$$
+func demo5() { // rotating cube 3d with a cam
 	o := [][]float64 {{0}, {5}, {-30}, {1}} // 1 for 4 by 1 matrix
 	u := [][]float64 {{5}, {5}, {5}, {0}} // 0 dosent matter here
-	// axis := [][]float64 {{1}, {1}, {-1}, {0}}
-	// rot := rotAboutVec(0.0, axis)
-	rot := rotMat3dy(0.0)
+	axis := [][]float64 {{1}, {1}, {-1}, {0}}
+	rot := rotAboutVec(0.2, axis)
+	// rot := rotMat3dy(0.2)
 	rot = rotAboutPoint(rot, o)
-	b := cuboid{}
-	b.create(o, u)
+	b := cuboid(o, u)
+	// b.create(o, u)
 	rawboard, board, zbuf := genB()
 	win, printy := perint(rawboard, board, zbuf)
 
@@ -121,7 +121,8 @@ func demo5() { // rotating cube 3d with a cam $$BROKEN$$
 		default:
 		}
 		b.transform(rot)
-		b.draw(camMat, board, '.')
+		// b.draw(&camPos, camMat, board, '.')
+		b.fill(&camPos, camMat, board, zbuf, '#')
 		printy()
 		time.Sleep(time.Millisecond*50)
 	}

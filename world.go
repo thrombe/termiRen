@@ -2,7 +2,7 @@ package main
 
 import (
 	"bufio"
-	"math"
+	// "math"
 	"os"
 	"strconv"
 	"strings"
@@ -10,25 +10,6 @@ import (
 )
 
 // helper functions
-
-//use this to represent multiple coords in 1 matrix
-func matAppend(mat [][]float64, mats... [][]float64) {
-    for c := 0; c < len(mat); c++ {
-        for _, mat1 := range mats {
-            mat[c] = append(mat[c], mat1[c]...)
-        }
-    }
-}
-
-//returns a 3d vector from the given column no.
-func getCoord3d(mat [][]float64, n int) [][]float64 {
-    return vector( // convert this into a n dimentional instead of jusst 3
-        mat[0][n],
-        mat[1][n],
-        mat[2][n],
-        mat[3][n],
-    )
-}
 
 //multiplies matrix with each coord.
 // enter 1 or 2 vector lists, multiplication of mat and 1st is saved in second (or 1st if second not entered)
@@ -53,48 +34,6 @@ func transform(mat [][]float64, verlists ...[][][]float64) {
 }
 
 // objects
-
-type cuboid struct{
-    vertices [][][]float64
-    camtices [][][]float64
-}
-
-// creates vertices of cube from given centre and half diagonal vectors.
-// stores them in cube.coords in a single 4 by 8 matrix
-// o is centre and u is half diagonal vector
-func (cu *cuboid) create(o, u [][]float64) {
-    cu.camtices = make([][][]float64, 8) // initiallise camoords
-    // creating cube parallel to axes by default
-    u = [][]float64 { // another method for this is rotating the original u by some angle (pi/2 in case of cubes) in different planes
-        {u[0][0], u[0][0], -u[0][0], -u[0][0], u[0][0], u[0][0], -u[0][0], -u[0][0]},
-        {u[1][0], u[1][0], u[1][0], u[1][0], -u[1][0], -u[1][0], -u[1][0], -u[1][0]},
-        {u[2][0], -u[2][0], -u[2][0], u[2][0], u[2][0], -u[2][0], -u[2][0], u[2][0]},
-        {0, 0, 0, 0, 0, 0, 0, 0},
-    }
-    coords := make([][]float64, 4)
-    matAppend(coords, o, o, o, o, o, o, o, o)
-    coords = matAdd(coords, u)
-    cu.vertices = make([][][]float64, 8)
-    for i := 0; i < 8; i++ {
-        cu.vertices[i] = getCoord3d(coords, i)
-    }
-    cu.camtices = make([][][]float64, len(cu.vertices))
-    copy(cu.camtices, cu.vertices)
-}
-
-//draws the cuboid on canvas using camoords
-func (cu *cuboid) draw(cammat [][]float64, board [][] byte, texture  byte) {
-    transform(cammat, cu.vertices, cu.camtices)
-    for i := 0; i < 4; i++ { // connecting vertices by lines
-        line(cu.camtices[i], cu.camtices[(i+1)%4], board, texture)
-        line(cu.camtices[i+4], cu.camtices[4+(i+1)%4], board, texture)
-        line(cu.camtices[i], cu.camtices[i+4], board, texture)
-    }
-}
-
-func (cu *cuboid) transform(mat [][]float64) {
-    transform(mat, cu.vertices)
-}
 
 type triangle struct{
     vertices []*[][]float64
@@ -161,71 +100,6 @@ func (tri *triangle) fill(camPos *[][]float64, board [][] byte, zbuf [][]float64
         poin := nMatAdd(v1, matScalar(v21, w2), matScalar(v31, 1-w2)) // just to make sure there are no holes (works pretty well)
         point3d(poin, board, zbuf, texture)
     }
-}
-
-type sphere struct {
-    vertices [][][]float64
-    camtices [][][]float64
-    triangles []triangle
-}
-
-//creates and joins vertices of a sphere from triangles
-func (sp *sphere) create(o [][]float64, r float64, n int) {
-    dtheta := math.Pi/float64(n)
-    dphi := dtheta*2
-    var theta, phi float64
-    for j := 0; j < n+1; j++ {
-        for i := 0; i < n; i++ {
-            vertex := vector(r*math.Sin(theta)*math.Cos(phi), r*math.Cos(theta), r*math.Sin(theta)*math.Sin(phi), 0) // 4th col is 0 cuz o has 1 there
-            sp.vertices = append(sp.vertices, matAdd(vertex, o))
-            sp.camtices = append(sp.camtices, vector(vertex[0][0], vertex[1][0], vertex[2][0], vertex[3][0]))
-            phi += dphi
-        }
-        theta += dtheta
-    }
-
-    sp.triangles = make([]triangle, n*(2*n))
-    for j := 0; j < n; j++ {
-        for i := 0; i < n; i++ {
-            sp.triangles[j*n*2+i*2] = triangle{}
-            sp.triangles[j*n*2+i*2].create(
-                &sp.vertices[j*n+i], 
-                &sp.vertices[j*n+(i+1)%n], 
-                &sp.vertices[(j+1)*n+i],
-                &sp.camtices[j*n+i], 
-                &sp.camtices[j*n+(i+1)%n], 
-                &sp.camtices[(j+1)*n+i],
-            )
-            sp.triangles[j*n*2+i*2+1] = triangle{}
-            sp.triangles[j*n*2+i*2+1].create(
-                &sp.vertices[(j+1)*n+i], 
-                &sp.vertices[j*n+(i+1)%n], 
-                &sp.vertices[(j+1)*n+(i+1)%n],
-                &sp.camtices[(j+1)*n+i], 
-                &sp.camtices[j*n+(i+1)%n], 
-                &sp.camtices[(j+1)*n+(i+1)%n],
-            )
-        }
-    }
-}
-
-func (sp *sphere) draw(camPos *[][]float64, cammat [][]float64, board [][] byte, texture  byte) {
-    transform(cammat, sp.vertices, sp.camtices)
-    for _, tri := range sp.triangles {
-        tri.draw(camPos, board, texture)
-    }
-}
-
-func (sp *sphere) fill(camPos *[][]float64, cammat [][]float64, board [][] byte, zbuf [][]float64, texture  byte) {
-    transform(cammat, sp.vertices, sp.camtices)
-    for _, tri := range sp.triangles {
-        tri.fill(camPos, board, zbuf, texture)
-    }
-}
-
-//multiplies the mat with coords of each triangle
-func (sp *sphere) transform(mat [][]float64) {
-    transform(mat, sp.vertices)
 }
 
 type object struct {
