@@ -59,34 +59,37 @@ func (tri *triangle) normal() [][]float64 {
 }
 
 //draws triangle using camtices
-func (tri *triangle) draw(camPos *[][]float64, board [][] byte, texture  byte) {
-    if vecDot(matSub(*tri.vertices[0], *camPos), tri.normal()) >= 0 {return} // if the front(anticlockwise) face of triangle faces away from/perpendicular to cam, dont draw 
+func (tri *triangle) draw(cam *camera, board [][] byte, texture  byte) {
+    if vecDot(matSub(*tri.vertices[0], cam.camPos), tri.normal()) >= 0 {return} // if the front(anticlockwise) face of triangle faces away from/perpendicular to cam, dont draw 
     // >= cuz both vectors have different origin
 
+    charRatio, xlim, ylim := cam.charRatio, cam.xlim, cam.ylim
     for i := 0; i < 3; i++ {
-        line(*tri.camtices[i], *tri.camtices[(i+1)%3], board, texture)
+        line(*tri.camtices[i], *tri.camtices[(i+1)%3], charRatio, xlim, ylim, board, texture)
     }
 }
 
 //fills up triangle using camtices
-func (tri *triangle) fill(camPos *[][]float64, board [][] byte, zbuf [][]float64, texture  byte) {
-    if vecDot(matSub(*tri.vertices[0], *camPos), tri.normal()) >= 0 {return} // if the front(anticlockwise) face of triangle faces away from/perpendicular to cam, dont draw 
+func (tri *triangle) fill(cam *camera, board [][] byte, zbuf [][]float64) {
+    if vecDot(matSub(*tri.vertices[0], cam.camPos), tri.normal()) >= 0 {return} // if the front(anticlockwise) face of triangle faces away from/perpendicular to cam, dont draw 
     // >= cuz both vectors have different origin
     
     i := 0
     for _, vert := range tri.camtices { // if traingle is outside the screen, dont draw
-        if absVal((*vert)[0][0]) > float64(xlim)/2 || absVal((*vert)[1][0])*charRatio > float64(ylim)/2 {i++}
+        if absVal((*vert)[0][0]) > float64(cam.xlim)/2 || absVal((*vert)[1][0])*cam.charRatio > float64(cam.ylim)/2 {i++}
     }
     if i == 3 {return}
+
+    xlim, ylim, charRatio := cam.xlim, cam.ylim, cam.charRatio
     
-    lightDir := matSub(*tri.vertices[0], *camPos)
+    lightDir := matSub(*tri.vertices[0], cam.camPos)
     // lightDir := [][]float64 {{-1}, {-1}, {-2}, {0}} // from +z to -z
     tex := vecDot(vecUnit(lightDir), vecUnit(tri.normal())) // 0 to 1
     // textures := ".`^,:;Il!i~+_-?][}{!)(|/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao*#MW&8%B@$"
     textures := "':;!vx1WnOM@B"
     tex = -tex*float64(len(textures)-1)
     if tex < 0 {tex = 0}
-    texture =  byte(textures[round(tex)])
+    texture :=  byte(textures[round(tex)])
     
     v1 := *tri.camtices[0]
     v21 := matSub(*tri.camtices[1], v1)
@@ -95,10 +98,10 @@ func (tri *triangle) fill(camPos *[][]float64, board [][] byte, zbuf [][]float64
     for w2 := 1.0; w2 >= 0; w2 -= dw2 {
         for w3 := 0.0; w3 <= 1-w2; w3 += dw3 {
             poin := nMatAdd(v1, matScalar(v21, w2), matScalar(v31, w3))
-            point3d(poin, board, zbuf, texture)
+            point3d(poin, charRatio, xlim, ylim, board, zbuf, texture)
         }
         poin := nMatAdd(v1, matScalar(v21, w2), matScalar(v31, 1-w2)) // just to make sure there are no holes (works pretty well)
-        point3d(poin, board, zbuf, texture)
+        point3d(poin, charRatio, xlim, ylim, board, zbuf, texture)
     }
 }
 
@@ -169,17 +172,17 @@ func (ob *object) create(path string, o [][]float64) {
  	}
 }
 
-func (ob *object) draw(camPos *[][]float64, cammat [][]float64, board [][] byte, texture  byte) {
+func (ob *object) draw(cam *camera, cammat [][]float64, board [][] byte, texture  byte) {
     transform(cammat, ob.vertices, ob.camtices)
     for _, tri := range ob.triangles {
-        tri.draw(camPos, board, texture)
+        tri.draw(cam, board, texture)
     }
 }
 
-func (ob *object) fill(camPos *[][]float64, cammat [][]float64, board [][] byte, zbuf [][]float64, texture  byte) {
+func (ob *object) fill(cam *camera, cammat [][]float64, board [][] byte, zbuf [][]float64) {
     transform(cammat, ob.vertices, ob.camtices)
     for _, tri := range ob.triangles {
-        tri.fill(camPos, board, zbuf, texture)
+        tri.fill(cam, board, zbuf)
     }
 }
 

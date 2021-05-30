@@ -3,12 +3,12 @@ package main
 import "math"
 
 //returns projection matrix with 1 and 1000 as near and far
-func projectionMat() [][]float64 {
-    cot := 1/math.Tan(fov/2)
+func projectionMat(cam *camera) [][]float64 {
+    cot := 1/math.Tan(cam.fov/2)
     // scrDist := float64(xlim)*cot/2
     f := 1000.0
     n := 1.0
-    scale := float64(xlim)/2
+    scale := float64(cam.xlim)/2
     return matrix(4, 4, 
         cot*scale, 0, 0, 0,
         0, cot*scale, 0, 0,

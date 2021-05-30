@@ -53,12 +53,10 @@
     
 
 . plan
-    . find centres of imported objects
-      . find the bounding box and then the centre
-      . save it in object.o ? or something
     . eliminate global stuff and see performance change
       . a lot of global constants are used in heavy loops
       . store in camera{} or something
+      . how do i do point() and stuff?
     . clip for z == 0
       . M1) while changing camtices or something, if z > -1 then change the triangle 
         such that it faces away from cam. and calc for that is easy. so it gets
@@ -79,8 +77,7 @@
       . need to recalculate every time the object moves on world space
     . eliminate transform() if rot is just identity matrx
       . might help squeez some performance
-    . convert sphere and cuboid into objects
-      . change cuboid to use triangles
+    . objects
       . make torus
     . optimise (just the mesh part and not the fill)
       /. a := []byte("shshh") fmt.Printf("%s", a).

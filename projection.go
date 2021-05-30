@@ -7,8 +7,9 @@ import (
     )
 
 //returns a generator style func that prints the board and also clears zbuf and the board
-func perint(rawboard [] byte, board [][] byte, zbuf [][]float64) (*ncurses.Window, func()) {
-    if ncursed == 1 {
+func perint(cam *camera, rawboard [] byte, board [][] byte, zbuf [][]float64) (*ncurses.Window, func()) {
+    xlim, ylim := cam.xlim, cam.ylim
+    if cam.ncursed {
         win := ncurses.Init()
         // xlim, ylim = win.GetMaxYX() // donno if its x, y or y, x
         ncurses.CursSet(0)
@@ -37,7 +38,8 @@ func perint(rawboard [] byte, board [][] byte, zbuf [][]float64) (*ncurses.Windo
 }
 
 //make a canvas
-func genB() ([]byte, [][]byte, [][]float64) {
+func genB(cam *camera) ([]byte, [][]byte, [][]float64) {
+    xlim, ylim := cam.xlim, cam.ylim
     rawboard := make([]byte, (xlim+1)*ylim)
     board := make([][]byte, ylim)
     zbufrray := make([]float64, xlim*ylim)
@@ -62,21 +64,21 @@ func genB() ([]byte, [][]byte, [][]float64) {
 // }
 
 //enter coords of points and return index in canvas
-func giveInd(x, y float64) (int, int) {
-    return round(x)+int(xlim/2), -round(y)+int(ylim/2)
+func giveInd(x, y float64, xlim, ylim int) (int, int) {
+    return round(x)+xlim/2, -round(y)+ylim/2
 }
 
 //draw point on canvas
-func point(h, k float64, board [][] byte, texture  byte) {
-    x, y := giveInd(h, k*charRatio)
+func point(h, k, charRatio float64, xlim, ylim int, board [][]byte, texture byte) {
+    x, y := giveInd(h, k*charRatio, xlim, ylim)
     if 0 <= x && x < xlim && 0 <= y && y < ylim {
         board[y][x] = texture
     }
 }
 
 //draws a 3d point on canvas using zbuf
-func point3d(p [][]float64, board [][] byte, zbuf [][]float64, texture  byte) {
-    x, y := giveInd(p[0][0], p[1][0]*charRatio)
+func point3d(p [][]float64, charRatio float64, xlim, ylim int, board [][]byte, zbuf [][]float64, texture byte) {
+    x, y := giveInd(p[0][0], p[1][0]*charRatio, xlim, ylim)
     if !(0 <= x && x < xlim && 0 <= y && y < ylim) {return}
     if zbuf[y][x] < p[2][0] {
         zbuf[y][x] = p[2][0]
@@ -84,8 +86,28 @@ func point3d(p [][]float64, board [][] byte, zbuf [][]float64, texture  byte) {
     }
 }
 
+// func brush(cam *camera, board [][]byte, zbuf [][]float64) (func(float64, float64, byte), func([][]float64, byte)) {
+//     xlim, ylim := cam.xlim, cam.ylim
+//     charRatio := cam.charRatio
+//     point := func(h, k float64, texture byte) {
+//         x, y := round(h)+xlim/2, -round(k*charRatio)+ylim/2
+//         if 0 <= x && x < xlim && 0 <= y && y < ylim {
+//             board[y][x] = texture
+//         }
+//     }
+//     point3d := func(p [][]float64, texture byte) {
+//         x, y := round(p[0][0])+xlim/2, -round(p[1][0]*charRatio)+ylim/2
+//         if !(0 <= x && x < xlim && 0 <= y && y < ylim) {return}
+//         if zbuf[y][x] < p[2][0] {
+//             zbuf[y][x] = p[2][0]
+//             board[y][x] = texture
+//         }
+//     }
+//     return point, point3d
+// }
+
 //draw line on canvas
-func line(v1, v2 [][]float64, board [][] byte, texture  byte) {
+func line(v1, v2 [][]float64, charRatio float64, xlim, ylim int, board [][] byte, texture byte) {
     x, y, x2, y2 := round(v1[0][0]), round(v1[1][0]), round(v2[0][0]), round(v2[1][0])
     var steepx, steepy, ydir int
     if absVal(float64(x2-x)) > absVal(float64(y2-y)) {steepx, steepy = 1, 0} else {steepx, steepy, x, x2, y, y2 = 0, 1, y, y2, x, x2} // if slope > 1
@@ -94,7 +116,7 @@ func line(v1, v2 [][]float64, board [][] byte, texture  byte) {
     if dydy > 0 {ydir = 1} else {ydir, dydy = -1, -dydy} // we only need magnitude of dy. ydir is slope > 0 or slope < 0
     eror := 0
     for ; x <= x2; x++ {
-        point(float64(x*steepx+y*steepy), float64(y*steepx+x*steepy), board, texture)
+        point(float64(x*steepx+y*steepy), float64(y*steepx+x*steepy), charRatio, xlim, ylim, board, texture)
         eror += dydy // similar to err += dy/dx and then checking if err > .5, if yes err -= 1 (hint- multiplying by 2*dx eliminates need of floats)
         if eror > dx {
             y += ydir
@@ -103,9 +125,9 @@ func line(v1, v2 [][]float64, board [][] byte, texture  byte) {
     }
 }
 
-//draw vector with v1 as offset and v2 as direction and size
-func drawVec(v1, v2 [][]float64, board [][] byte, texture  byte) {
-    line(v1, matAdd(v1, v2), board, texture)
+// draw vector with v1 as offset and v2 as direction and size
+func drawVec(v1, v2 [][]float64, charRatio float64, xlim, ylim int, board [][] byte, texture  byte) {
+    line(v1, matAdd(v1, v2), charRatio, xlim, ylim, board, texture)
 }
 
 // /*rotate x, y about ox, oy by r radians*/

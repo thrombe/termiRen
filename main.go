@@ -1,37 +1,44 @@
 package main
 
 import (
-	"time"
+	// "time"
 	// "fmt"
 	"math"
 	"seehuhn.de/go/ncurses"
 	// "github.com/pkg/profile"
 )
 
-const xlim = 151
-const ylim = 163
-const fov = math.Pi/2.5 //*horizontal // keep this between 0 and pi
-const charRatio = 1.4/2.55 // used only in point() // width/height of a character
-const ncursed = 1 // print using ncurses if 1 else just fmt.print
+//creates a default position and direction for the camera
+func camInit() camera {
+	cam := camera{}
 
-const tranV = 4.0 // camera movement velocity (metres?)
-const rotA = 0.1 // camera rotation angular vemocity (radians)
+	cam.xlim = 151
+	cam.ylim = 163
+	cam.fov = math.Pi/2.5 //*horizontal // keep this between 0 and pi
+	cam.charRatio = 1.4/2.55 // used only in point() // width/height of a character
+	cam.tranV = 4.0 // camera movement velocity (metres?)
+	cam.rotA = 0.1 // camera rotation angular vemocity (radians)
 
+	cam.camPos = vector(0, 0, 0, 1)
+	cam.camDir = vector(0, 0, -cam.tranV, 0)
+	
+	cam.ncursed = true // print using ncurses if true else just fmt.print
+	
+	return cam
+}
 // CONTROLS - wasd to move, ijkl to turn camera, WS to move up and down, q to QUIT
 
 func main() {
 	// defer profile.Start(profile.MemProfile).Stop()
 	// defer profile.Start().Stop()
-    if ncursed == 1 {defer ncurses.EndWin()}
-    demo5()
+    if (camInit()).ncursed {defer ncurses.EndWin()}
+    demo8()
 }
 
 func demo8() { // load obj files
 	o := vector(0, 0, -10, 1) // offset the object by that vector
 	obj := object{}
 	obj.create("./objects/teapot.obj", o) // 47.2k triangles 23.36k vertices in big chungus
-	rawboard, board, zbuf := genB()
-	win, printy:= perint(rawboard, board, zbuf)
 	
 	// axis := [][]float64 {{1}, {1}, {-1}, {0}} // rotations
 	// rot := rotAboutVec(0.2, axis)
@@ -44,9 +51,11 @@ func demo8() { // load obj files
 
 	matchan := make(chan [][]float64)
 	quitchan := make(chan bool)
-	camPos, camDir := camInit()
-	go detectKey(&camPos, &camDir, win, matchan, quitchan)
-	camMat := matMul(projectionMat(), transMat(camPos)) // default value
+	cam := camInit()
+	rawboard, board, zbuf := genB(&cam)
+	win, printy:= perint(&cam, rawboard, board, zbuf)
+	go detectKey(&cam, win, matchan, quitchan)
+	camMat := matMul(projectionMat(&cam), transMat(cam.camPos)) // default value
 
 	loop: for { // press q to quit
 		select {
@@ -58,12 +67,12 @@ func demo8() { // load obj files
 
 		// obj.draw(&camPos, camMat, board, '.')
 		// time.Sleep(time.Millisecond*50)
-		obj.fill(&camPos, camMat, board, zbuf, '#')
+		obj.fill(&cam, camMat, board, zbuf)
 		printy()
 	}
 }
 
-
+/*
 func demo7() { // sphere with n*n triangles
 	o := [][]float64 {{0}, {0}, {-30}, {1}}
 	// axis := [][]float64 {{1}, {1}, {-1}, {0}}
@@ -127,3 +136,4 @@ func demo5() { // rotating cube 3d with a cam
 		time.Sleep(time.Millisecond*50)
 	}
 }
+*/
