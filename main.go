@@ -1,8 +1,8 @@
 package main
 
 import (
-	// "time"
-	// "fmt"
+	"time"
+	"fmt"
 	"math"
 	"seehuhn.de/go/ncurses"
 	// "github.com/pkg/profile"
@@ -31,11 +31,13 @@ func camInit() camera {
 func main() {
 	// defer profile.Start(profile.MemProfile).Stop()
 	// defer profile.Start().Stop()
-    if (camInit()).ncursed {defer ncurses.EndWin()}
-    demo8()
+    // if (camInit()).ncursed {defer ncurses.EndWin()}
+    a := demo8()
+	ncurses.EndWin()
+	fmt.Println(a)
 }
 
-func demo8() { // load obj files
+func demo8() time.Duration { // load obj files
 	o := vector(0, 0, -10, 1) // offset the object by that vector
 	obj := object{}
 	obj.create("./objects/teapot.obj", o) // 47.2k triangles 23.36k vertices in big chungus
@@ -57,7 +59,8 @@ func demo8() { // load obj files
 	go detectKey(&cam, win, matchan, quitchan)
 	camMat := matMul(projectionMat(&cam), transMat(cam.camPos)) // default value
 
-	loop: for { // press q to quit
+	now := time.Now()
+	loop: for i :=0; i < 200; i++ { // press q to quit
 		select {
 		case camMat = <- matchan:
 		case <- quitchan: break loop
@@ -70,6 +73,7 @@ func demo8() { // load obj files
 		obj.fill(&cam, camMat, board, zbuf)
 		printy()
 	}
+	return time.Now().Sub(now)
 }
 
 /*
