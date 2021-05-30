@@ -53,10 +53,6 @@
     
 
 . plan
-    . eliminate global stuff and see performance change
-      . a lot of global constants are used in heavy loops
-      . store in camera{} or something
-      . how do i do point() and stuff?
     . clip for z == 0
       . M1) while changing camtices or something, if z > -1 then change the triangle 
         such that it faces away from cam. and calc for that is easy. so it gets
@@ -74,9 +70,7 @@
     . try pre-calculated normals
       . let normals always originate from vertices[0]. so normals would just be points in space
         . this makes finding normals into a matSub and having to maintain the normal points (from the above point)
-      . need to recalculate every time the object moves on world space
-    . eliminate transform() if rot is just identity matrx
-      . might help squeez some performance
+      . need to recalculate every time the object moves in world space
     . objects
       . make torus
     . optimise (just the mesh part and not the fill)

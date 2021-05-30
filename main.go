@@ -9,31 +9,33 @@ import (
 )
 
 //creates a default position and direction for the camera
-func camInit() camera {
+func camInit() *camera {
 	cam := camera{}
 
-	cam.xlim = 151
-	cam.ylim = 163
+	// can play with these
+	cam.xlim = 151 // screen width in characters
+	cam.ylim = 163 // screen height in characters
 	cam.fov = math.Pi/2.5 //*horizontal // keep this between 0 and pi
-	cam.charRatio = 1.4/2.55 // used only in point() // width/height of a character
-	cam.tranV = 4.0 // camera movement velocity (metres?)
+	cam.charRatio = 1.4/2.55 // width/height of a character
+	cam.tranV = 4.0 // camera movement velocity (metre/s?)
 	cam.rotA = 0.1 // camera rotation angular vemocity (radians)
 
+	// default values
 	cam.camPos = vector(0, 0, 0, 1)
 	cam.camDir = vector(0, 0, -cam.tranV, 0)
+	cam.camMat = matMul(projectionMat(&cam), transMat(cam.camPos))
 	
 	cam.ncursed = true // print using ncurses if true else just fmt.print
 	
-	return cam
+	return &cam
 }
 // CONTROLS - wasd to move, ijkl to turn camera, WS to move up and down, q to QUIT
 
 func main() {
 	// defer profile.Start(profile.MemProfile).Stop()
 	// defer profile.Start().Stop()
-    // if (camInit()).ncursed {defer ncurses.EndWin()}
     a := demo8(true)
-	ncurses.EndWin()
+	if (camInit()).ncursed {ncurses.EndWin()}
 	fmt.Println(a)
 }
 
@@ -50,31 +52,25 @@ func demo8(taime bool) time.Duration { // load obj files
 	rot := rotMat3dy(0.2)
 	rot = rotAboutPoint(rot, obj.center)
 
-	// scale objects
-	// big := scaleMat(5, 4) // scale object size
-	// big = rotAboutPoint(big, obj.center)
-	// obj.transform(big)
-
 	matchan := make(chan [][]float64)
 	quitchan := make(chan bool)
 	cam := camInit()
-	genB(&cam)
-	win, printy:= perint(&cam)
-	go detectKey(&cam, win, matchan, quitchan)
-	camMat := matMul(projectionMat(&cam), transMat(cam.camPos)) // default value
+	genB(cam)
+	win, printy:= perint(cam)
+	go detectKey(cam, win, matchan, quitchan)
 
 	start := time.Now()
 	loop: for i := 0; (i < 200 || !taime); i++ { // press q to quit
 		select {
-		case camMat = <- matchan:
+		case cam.camMat = <- matchan:
 		case <- quitchan: break loop
 		default:
 		}
 		obj.transform(rot)
 
-		// obj.draw(&camPos, camMat, board, '.')
+		// obj.draw(cam, '.')
 		// time.Sleep(time.Millisecond*50)
-		obj.fill(&cam, camMat)
+		obj.fill(cam)
 		printy()
 	}
 	return time.Now().Sub(start)

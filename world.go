@@ -172,15 +172,15 @@ func importObj(path string, o [][]float64) *object {
     return &ob
 }
 
-func (ob *object) draw(cam *camera, cammat [][]float64, board [][] byte, texture  byte) {
-    transform(cammat, ob.vertices, ob.camtices)
+func (ob *object) draw(cam *camera, texture  byte) {
+    transform(cam.camMat, ob.vertices, ob.camtices)
     for _, tri := range ob.triangles {
         tri.draw(cam, texture)
     }
 }
 
-func (ob *object) fill(cam *camera, cammat [][]float64) {
-    transform(cammat, ob.vertices, ob.camtices)
+func (ob *object) fill(cam *camera) {
+    transform(cam.camMat, ob.vertices, ob.camtices)
     for _, tri := range ob.triangles {
         tri.fill(cam)
     }
@@ -189,4 +189,11 @@ func (ob *object) fill(cam *camera, cammat [][]float64) {
 //multiplies the mat with coords of each triangle
 func (ob *object) transform(mat [][]float64) {
     transform(mat, ob.vertices)
+}
+
+// scale objects
+func (ob *object) scale(factor float64) {
+	big := scaleMat(factor, 4) // scale object size
+	big = rotAboutPoint(big, ob.center)
+	ob.transform(big)
 }

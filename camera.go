@@ -12,6 +12,7 @@ type camera struct {
 	board [][]byte
 	zbuf [][]float64
 	rawboard []byte
+	camMat [][]float64
 	
 	ncursed bool
 }
