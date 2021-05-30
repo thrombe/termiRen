@@ -32,21 +32,25 @@ func main() {
 	// defer profile.Start(profile.MemProfile).Stop()
 	// defer profile.Start().Stop()
     // if (camInit()).ncursed {defer ncurses.EndWin()}
-    a := demo8()
+    a := demo8(true)
 	ncurses.EndWin()
 	fmt.Println(a)
 }
 
-func demo8() time.Duration { // load obj files
+func demo8(taime bool) time.Duration { // load obj files
 	o := vector(0, 0, -10, 1) // offset the object by that vector
-	obj := object{}
-	obj.create("./objects/teapot.obj", o) // 47.2k triangles 23.36k vertices in big chungus
+
+	// create/import objects
+	obj := importObj("./objects/teapot.obj", o) // import .obj files
+	// obj := sphere(o, 5, 50) // sphere with r as radius and n*n triangles
+	// obj := cuboid(o, vector(2, 2, 2, 0))
 	
-	// axis := [][]float64 {{1}, {1}, {-1}, {0}} // rotations
-	// rot := rotAboutVec(0.2, axis)
+	// rotate objects per frame
+	// rot := rotAboutVec(0.2, vector(1, 1, -1, 0))
 	rot := rotMat3dy(0.2)
 	rot = rotAboutPoint(rot, obj.center)
 
+	// scale objects
 	// big := scaleMat(5, 4) // scale object size
 	// big = rotAboutPoint(big, obj.center)
 	// obj.transform(big)
@@ -54,13 +58,13 @@ func demo8() time.Duration { // load obj files
 	matchan := make(chan [][]float64)
 	quitchan := make(chan bool)
 	cam := camInit()
-	rawboard, board, zbuf := genB(&cam)
-	win, printy:= perint(&cam, rawboard, board, zbuf)
+	genB(&cam)
+	win, printy:= perint(&cam)
 	go detectKey(&cam, win, matchan, quitchan)
 	camMat := matMul(projectionMat(&cam), transMat(cam.camPos)) // default value
 
-	now := time.Now()
-	loop: for i :=0; i < 200; i++ { // press q to quit
+	start := time.Now()
+	loop: for i := 0; (i < 200 || !taime); i++ { // press q to quit
 		select {
 		case camMat = <- matchan:
 		case <- quitchan: break loop
@@ -70,74 +74,8 @@ func demo8() time.Duration { // load obj files
 
 		// obj.draw(&camPos, camMat, board, '.')
 		// time.Sleep(time.Millisecond*50)
-		obj.fill(&cam, camMat, board, zbuf)
+		obj.fill(&cam, camMat)
 		printy()
 	}
-	return time.Now().Sub(now)
+	return time.Now().Sub(start)
 }
-
-/*
-func demo7() { // sphere with n*n triangles
-	o := [][]float64 {{0}, {0}, {-30}, {1}}
-	// axis := [][]float64 {{1}, {1}, {-1}, {0}}
-	// rot := rotAboutVec(0.2, axis)
-	rot := rotMat3dy(0.0)
-	rot = rotAboutPoint(rot, o)
-	sp := sphere(o, 5, 200)
-	// sp.create // performance goal(for now)(without multicore) - should be smooth for 200 at just the draw
-	rawboard, board, zbuf := genB()
-	win, printy:= perint(rawboard, board, zbuf)
-
-	matchan := make(chan [][]float64)
-	quitchan := make(chan bool)
-	camPos, camDir := camInit()
-	go detectKey(&camPos, &camDir, win, matchan, quitchan)
-	camMat := matMul(projectionMat(), transMat(camPos)) // default value
-
-	loop: for { // press q to quit
-		select {
-		case camMat = <- matchan:
-		case <- quitchan: break loop
-		default:
-		}
-		sp.transform(rot)
-
-		sp.draw(&camPos, camMat, board, '.')
-		// time.Sleep(time.Millisecond*50)
-		// sp.fill(&camPos, camMat, board, zbuf, '#')
-		printy()
-	}
-}
-
-func demo5() { // rotating cube 3d with a cam
-	o := [][]float64 {{0}, {5}, {-30}, {1}} // 1 for 4 by 1 matrix
-	u := [][]float64 {{5}, {5}, {5}, {0}} // 0 dosent matter here
-	axis := [][]float64 {{1}, {1}, {-1}, {0}}
-	rot := rotAboutVec(0.2, axis)
-	// rot := rotMat3dy(0.2)
-	rot = rotAboutPoint(rot, o)
-	b := cuboid(o, u)
-	// b.create(o, u)
-	rawboard, board, zbuf := genB()
-	win, printy := perint(rawboard, board, zbuf)
-
-	matchan := make(chan [][]float64)
-	quitchan := make(chan bool)
-	camPos, camDir := camInit()
-	go detectKey(&camPos, &camDir, win, matchan, quitchan)
-	camMat := matMul(projectionMat(), transMat(camPos)) // default value
-
-	loop: for { // press q to quit
-		select {
-		case camMat = <- matchan:
-		case <- quitchan: break loop
-		default:
-		}
-		b.transform(rot)
-		// b.draw(&camPos, camMat, board, '.')
-		b.fill(&camPos, camMat, board, zbuf, '#')
-		printy()
-		time.Sleep(time.Millisecond*50)
-	}
-}
-*/

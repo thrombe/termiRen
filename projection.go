@@ -7,8 +7,8 @@ import (
     )
 
 //returns a generator style func that prints the board and also clears zbuf and the board
-func perint(cam *camera, rawboard [] byte, board [][] byte, zbuf [][]float64) (*ncurses.Window, func()) {
-    xlim, ylim := cam.xlim, cam.ylim
+func perint(cam *camera) (*ncurses.Window, func()) {
+    xlim, ylim, board, rawboard, zbuf := cam.xlim, cam.ylim, cam.board, cam.rawboard, cam.zbuf
     if cam.ncursed {
         win := ncurses.Init()
         // xlim, ylim = win.GetMaxYX() // donno if its x, y or y, x
@@ -38,24 +38,23 @@ func perint(cam *camera, rawboard [] byte, board [][] byte, zbuf [][]float64) (*
 }
 
 //make a canvas
-func genB(cam *camera) ([]byte, [][]byte, [][]float64) {
+func genB(cam *camera){
     xlim, ylim := cam.xlim, cam.ylim
-    rawboard := make([]byte, (xlim+1)*ylim)
-    board := make([][]byte, ylim)
+    cam.rawboard = make([]byte, (xlim+1)*ylim)
+    cam.board = make([][]byte, ylim)
     zbufrray := make([]float64, xlim*ylim)
-    zbuf := make([][]float64, ylim)
+    cam.zbuf = make([][]float64, ylim)
     var xini, xfin int = 0, xlim-1
     for y := 0; y < ylim; y++ {
-        board[y] = rawboard[xini : xfin+1]
-        rawboard[xfin+1] = '\n'
+        cam.board[y] = cam.rawboard[xini : xfin+1]
+        cam.rawboard[xfin+1] = '\n'
         xini += xlim-1+2
         xfin = xini+xlim-1
-        zbuf[y] = zbufrray[y*xlim : (y+1)*xlim]
+        cam.zbuf[y] = zbufrray[y*xlim : (y+1)*xlim]
         for x := 0; x < xlim; x++ {
-            zbuf[y][x] = -2
+            cam.zbuf[y][x] = -2
         }
     }
-    return rawboard, board, zbuf
 }
 
 // //USELESS /*enter index of pixel in canvas and return coors in space*/
@@ -69,45 +68,25 @@ func giveInd(x, y float64, xlim, ylim int) (int, int) {
 }
 
 //draw point on canvas
-func point(h, k, charRatio float64, xlim, ylim int, board [][]byte, texture byte) {
-    x, y := giveInd(h, k*charRatio, xlim, ylim)
-    if 0 <= x && x < xlim && 0 <= y && y < ylim {
-        board[y][x] = texture
+func point(h, k float64, cam *camera, texture byte) {
+    x, y := giveInd(h, k*cam.charRatio, cam.xlim, cam.ylim)
+    if 0 <= x && x < cam.xlim && 0 <= y && y < cam.ylim {
+        cam.board[y][x] = texture
     }
 }
 
 //draws a 3d point on canvas using zbuf
-func point3d(p [][]float64, charRatio float64, xlim, ylim int, board [][]byte, zbuf [][]float64, texture byte) {
-    x, y := giveInd(p[0][0], p[1][0]*charRatio, xlim, ylim)
-    if !(0 <= x && x < xlim && 0 <= y && y < ylim) {return}
-    if zbuf[y][x] < p[2][0] {
-        zbuf[y][x] = p[2][0]
-        board[y][x] = texture
+func point3d(p [][]float64, cam *camera, texture byte) {
+    x, y := giveInd(p[0][0], p[1][0]*cam.charRatio, cam.xlim, cam.ylim)
+    if !(0 <= x && x < cam.xlim && 0 <= y && y < cam.ylim) {return}
+    if cam.zbuf[y][x] < p[2][0] {
+        cam.zbuf[y][x] = p[2][0]
+        cam.board[y][x] = texture
     }
 }
 
-// func brush(cam *camera, board [][]byte, zbuf [][]float64) (func(float64, float64, byte), func([][]float64, byte)) {
-//     xlim, ylim := cam.xlim, cam.ylim
-//     charRatio := cam.charRatio
-//     point := func(h, k float64, texture byte) {
-//         x, y := round(h)+xlim/2, -round(k*charRatio)+ylim/2
-//         if 0 <= x && x < xlim && 0 <= y && y < ylim {
-//             board[y][x] = texture
-//         }
-//     }
-//     point3d := func(p [][]float64, texture byte) {
-//         x, y := round(p[0][0])+xlim/2, -round(p[1][0]*charRatio)+ylim/2
-//         if !(0 <= x && x < xlim && 0 <= y && y < ylim) {return}
-//         if zbuf[y][x] < p[2][0] {
-//             zbuf[y][x] = p[2][0]
-//             board[y][x] = texture
-//         }
-//     }
-//     return point, point3d
-// }
-
 //draw line on canvas
-func line(v1, v2 [][]float64, charRatio float64, xlim, ylim int, board [][] byte, texture byte) {
+func line(v1, v2 [][]float64, cam *camera, texture byte) {
     x, y, x2, y2 := round(v1[0][0]), round(v1[1][0]), round(v2[0][0]), round(v2[1][0])
     var steepx, steepy, ydir int
     if absVal(float64(x2-x)) > absVal(float64(y2-y)) {steepx, steepy = 1, 0} else {steepx, steepy, x, x2, y, y2 = 0, 1, y, y2, x, x2} // if slope > 1
@@ -116,7 +95,7 @@ func line(v1, v2 [][]float64, charRatio float64, xlim, ylim int, board [][] byte
     if dydy > 0 {ydir = 1} else {ydir, dydy = -1, -dydy} // we only need magnitude of dy. ydir is slope > 0 or slope < 0
     eror := 0
     for ; x <= x2; x++ {
-        point(float64(x*steepx+y*steepy), float64(y*steepx+x*steepy), charRatio, xlim, ylim, board, texture)
+        point(float64(x*steepx+y*steepy), float64(y*steepx+x*steepy), cam, texture)
         eror += dydy // similar to err += dy/dx and then checking if err > .5, if yes err -= 1 (hint- multiplying by 2*dx eliminates need of floats)
         if eror > dx {
             y += ydir
@@ -126,8 +105,8 @@ func line(v1, v2 [][]float64, charRatio float64, xlim, ylim int, board [][] byte
 }
 
 // draw vector with v1 as offset and v2 as direction and size
-func drawVec(v1, v2 [][]float64, charRatio float64, xlim, ylim int, board [][] byte, texture  byte) {
-    line(v1, matAdd(v1, v2), charRatio, xlim, ylim, board, texture)
+func drawVec(v1, v2 [][]float64, cam *camera, texture  byte) {
+    line(v1, matAdd(v1, v2), cam, texture)
 }
 
 // /*rotate x, y about ox, oy by r radians*/

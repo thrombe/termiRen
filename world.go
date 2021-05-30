@@ -59,18 +59,17 @@ func (tri *triangle) normal() [][]float64 {
 }
 
 //draws triangle using camtices
-func (tri *triangle) draw(cam *camera, board [][] byte, texture  byte) {
+func (tri *triangle) draw(cam *camera, texture  byte) {
     if vecDot(matSub(*tri.vertices[0], cam.camPos), tri.normal()) >= 0 {return} // if the front(anticlockwise) face of triangle faces away from/perpendicular to cam, dont draw 
     // >= cuz both vectors have different origin
 
-    charRatio, xlim, ylim := cam.charRatio, cam.xlim, cam.ylim
     for i := 0; i < 3; i++ {
-        line(*tri.camtices[i], *tri.camtices[(i+1)%3], charRatio, xlim, ylim, board, texture)
+        line(*tri.camtices[i], *tri.camtices[(i+1)%3], cam, texture)
     }
 }
 
 //fills up triangle using camtices
-func (tri *triangle) fill(cam *camera, board [][] byte, zbuf [][]float64) {
+func (tri *triangle) fill(cam *camera) {
     if vecDot(matSub(*tri.vertices[0], cam.camPos), tri.normal()) >= 0 {return} // if the front(anticlockwise) face of triangle faces away from/perpendicular to cam, dont draw 
     // >= cuz both vectors have different origin
     
@@ -79,8 +78,6 @@ func (tri *triangle) fill(cam *camera, board [][] byte, zbuf [][]float64) {
         if absVal((*vert)[0][0]) > float64(cam.xlim)/2 || absVal((*vert)[1][0])*cam.charRatio > float64(cam.ylim)/2 {i++}
     }
     if i == 3 {return}
-
-    xlim, ylim, charRatio := cam.xlim, cam.ylim, cam.charRatio
     
     lightDir := matSub(*tri.vertices[0], cam.camPos)
     // lightDir := [][]float64 {{-1}, {-1}, {-2}, {0}} // from +z to -z
@@ -98,10 +95,10 @@ func (tri *triangle) fill(cam *camera, board [][] byte, zbuf [][]float64) {
     for w2 := 1.0; w2 >= 0; w2 -= dw2 {
         for w3 := 0.0; w3 <= 1-w2; w3 += dw3 {
             poin := nMatAdd(v1, matScalar(v21, w2), matScalar(v31, w3))
-            point3d(poin, charRatio, xlim, ylim, board, zbuf, texture)
+            point3d(poin, cam, texture)
         }
         poin := nMatAdd(v1, matScalar(v21, w2), matScalar(v31, 1-w2)) // just to make sure there are no holes (works pretty well)
-        point3d(poin, charRatio, xlim, ylim, board, zbuf, texture)
+        point3d(poin, cam, texture)
     }
 }
 
@@ -112,7 +109,9 @@ type object struct {
     center [][]float64
 }
 
-func (ob *object) create(path string, o [][]float64) {
+func importObj(path string, o [][]float64) *object {
+    ob := object{}
+
     file, err := os.Open(path)
 	defer file.Close()
 	if err != nil {panic(err)}
@@ -170,19 +169,20 @@ func (ob *object) create(path string, o [][]float64) {
  	    tri.create(a, b, c, d, e, f)
  	    ob.triangles = append(ob.triangles, tri)
  	}
+    return &ob
 }
 
 func (ob *object) draw(cam *camera, cammat [][]float64, board [][] byte, texture  byte) {
     transform(cammat, ob.vertices, ob.camtices)
     for _, tri := range ob.triangles {
-        tri.draw(cam, board, texture)
+        tri.draw(cam, texture)
     }
 }
 
-func (ob *object) fill(cam *camera, cammat [][]float64, board [][] byte, zbuf [][]float64) {
+func (ob *object) fill(cam *camera, cammat [][]float64) {
     transform(cammat, ob.vertices, ob.camtices)
     for _, tri := range ob.triangles {
-        tri.fill(cam, board, zbuf)
+        tri.fill(cam)
     }
 }
 

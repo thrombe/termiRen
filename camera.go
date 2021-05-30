@@ -9,6 +9,9 @@ type camera struct {
 	camPos, camDir [][]float64
 	xlim, ylim int
 	tranV, rotA, fov, charRatio float64
+	board [][]byte
+	zbuf [][]float64
+	rawboard []byte
 	
 	ncursed bool
 }
