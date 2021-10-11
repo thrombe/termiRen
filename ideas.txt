@@ -50,9 +50,12 @@
       . it would add a matScalar but save 2 matSub and 1 matAdd
       . basically use the barycentric coords w1, w2, w3 instead of just 2
     . add panic quit Q to controls
-    
+    . termbox-go for drawing instead of ncurses
+      . cross platform
+      . also has colors
 
 . plan
+    . using a struct for vectors instead of forcing them in matrices gives a big speed boost
     . clip for z == 0
       . M1) while changing camtices or something, if z > -1 then change the triangle 
         such that it faces away from cam. and calc for that is easy. so it gets
